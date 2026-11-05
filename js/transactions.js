@@ -74,24 +74,81 @@ const Transactions = {
     }
   },
 
+  getCategoryIcon(cat) {
+    const c = (cat || '').toLowerCase();
+    if (c.includes('pulsa') || c.includes('paket data')) return '<i class="fa-solid fa-mobile-screen"></i>';
+    if (c.includes('voucher') || c.includes('perdana')) return '<i class="fa-solid fa-sim-card"></i>';
+    if (c.includes('aksesoris') || c.includes('headphone') || c.includes('case') || c.includes('charger')) return '<i class="fa-solid fa-headphones"></i>';
+    if (c.includes('servis') || c.includes('tempered') || c.includes('lcd')) return '<i class="fa-solid fa-screwdriver-wrench"></i>';
+    if (c.includes('wallet') || c.includes('dana') || c.includes('ovo') || c.includes('gopay')) return '<i class="fa-solid fa-wallet"></i>';
+    if (c.includes('pln') || c.includes('token') || c.includes('ppob')) return '<i class="fa-solid fa-bolt"></i>';
+    if (c.includes('piutang') || c.includes('pinjam')) return '<i class="fa-solid fa-hand-holding-dollar"></i>';
+    if (c.includes('kulakan') || c.includes('deposit')) return '<i class="fa-solid fa-money-bill-transfer"></i>';
+    if (c.includes('operasional') || c.includes('listrik') || c.includes('wifi') || c.includes('air')) return '<i class="fa-solid fa-lightbulb"></i>';
+    if (c.includes('sewa') || c.includes('ruko')) return '<i class="fa-solid fa-shop"></i>';
+    if (c.includes('gaji') || c.includes('makan')) return '<i class="fa-solid fa-utensils"></i>';
+    if (c.includes('hutang')) return '<i class="fa-solid fa-receipt"></i>';
+    if (c.includes('pribadi') || c.includes('prive')) return '<i class="fa-solid fa-user"></i>';
+    return '<i class="fa-solid fa-tag"></i>';
+  },
+
   renderCategoryOptions(selectedCat = null) {
     const selectedType = document.querySelector('input[name="trx-type"]:checked')?.value || 'in';
     const categories = Storage.getCategories(selectedType);
-    const select = document.getElementById('trx-category');
+    const categoryInput = document.getElementById('trx-category');
+    const categoryLabel = document.getElementById('trx-category-label');
+    const buttonsContainer = document.getElementById('trx-category-buttons');
     const filterSelect = document.getElementById('trx-filter-category');
 
-    if (select) {
-      select.innerHTML = '';
+    // Tentukan kategori terpilih (jika ada argumen selectedCat atau default kategori pertama)
+    const activeCategory = selectedCat && categories.includes(selectedCat)
+      ? selectedCat
+      : (categories.length > 0 ? categories[0] : '');
+
+    if (categoryInput) {
+      categoryInput.value = activeCategory;
+    }
+
+    if (categoryLabel) {
+      categoryLabel.textContent = activeCategory;
+      categoryLabel.className = selectedType === 'in' 
+        ? 'text-[11px] font-bold text-emerald-600 truncate max-w-[200px]'
+        : 'text-[11px] font-bold text-rose-600 truncate max-w-[200px]';
+    }
+
+    // Render Tombol-Tombol Kategori
+    if (buttonsContainer) {
+      buttonsContainer.innerHTML = '';
       categories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        if (selectedCat && selectedCat === cat) opt.selected = true;
-        select.appendChild(opt);
+        const isSelected = cat === activeCategory;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+
+        if (isSelected) {
+          btn.className = selectedType === 'in'
+            ? 'p-2.5 rounded-xl text-xs font-bold text-left transition flex items-center gap-2 border bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-500/30'
+            : 'p-2.5 rounded-xl text-xs font-bold text-left transition flex items-center gap-2 border bg-rose-600 text-white border-rose-600 shadow-sm shadow-rose-600/30 ring-2 ring-rose-500/30';
+        } else {
+          btn.className = 'p-2.5 rounded-xl text-xs font-medium text-left transition flex items-center gap-2 border bg-white text-slate-700 border-slate-200/90 hover:border-slate-300 hover:bg-slate-100/70 active:scale-98';
+        }
+
+        const iconHtml = this.getCategoryIcon(cat);
+        btn.innerHTML = `
+          <span class="shrink-0 w-6 h-6 rounded-lg ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center text-[11px]">
+            ${iconHtml}
+          </span>
+          <span class="truncate font-semibold">${cat}</span>
+        `;
+
+        btn.addEventListener('click', () => {
+          this.renderCategoryOptions(cat);
+        });
+
+        buttonsContainer.appendChild(btn);
       });
     }
 
-    // Also update filter dropdown with all categories
+    // Update filter dropdown di tabel riwayat transaksi (tetap dropdown biasa)
     if (filterSelect) {
       const curFilterVal = filterSelect.value;
       const allCats = [...new Set([...Storage.getCategories('in'), ...Storage.getCategories('out')])];
