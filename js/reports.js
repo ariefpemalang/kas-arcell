@@ -1,5 +1,5 @@
 /**
- * reports.js - Analitik, Grafik Keuangan, Ekspor Excel & Laporan Cetak KAS ARcell
+ * reports.js - Analitik, Grafik Keuangan, Ekspor Excel & Laporan Cetak BUKU ARcell
  */
 
 const Reports = {

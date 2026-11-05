@@ -1,5 +1,5 @@
 /**
- * app.js - Main Application Controller for KAS ARcell
+ * app.js - Main Application Controller for BUKU ARcell
  */
 
 const App = {
@@ -332,7 +332,7 @@ const App = {
       settingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const settings = {
-          storeName: document.getElementById('setting-store-name').value.trim() || 'KAS ARcell',
+          storeName: document.getElementById('setting-store-name').value.trim() || 'BUKU ARcell',
           tagline: document.getElementById('setting-tagline').value.trim(),
           storePhone: document.getElementById('setting-store-phone').value.trim(),
           storeAddress: document.getElementById('setting-store-address').value.trim()

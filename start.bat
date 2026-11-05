@@ -1,7 +1,7 @@
 @echo off
-title Membuka KAS ARcell...
+title Membuka BUKU ARcell...
 echo ===================================================
-echo           MEMBUKA APLIKASI KAS ARCELL
+echo           MEMBUKA APLIKASI BUKU ARCELL
 echo    Solusi Pembukuan Kas, Hutang & Piutang Konter
 echo ===================================================
 echo.

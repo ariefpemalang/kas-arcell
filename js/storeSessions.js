@@ -1,6 +1,6 @@
 /**
  * storeSessions.js - Modul Pembukuan Toko Harian (Buka / Tutup Toko, Saldo Kasir & Laba Bersih)
- * Penggabungan fitur "PEMBUKUAN TOKO" ke dalam KAS ARcell
+ * Penggabungan fitur "PEMBUKUAN TOKO" ke dalam BUKU ARcell
  */
 
 const StoreSessions = {

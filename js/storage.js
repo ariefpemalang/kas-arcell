@@ -1,5 +1,5 @@
 /**
- * storage.js - LocalStorage & Data Layer for KAS ARcell
+ * storage.js - LocalStorage & Data Layer for BUKU ARcell
  */
 
 const STORAGE_KEYS = {
@@ -14,7 +14,7 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_SETTINGS = {
-  storeName: 'KAS ARcell',
+  storeName: 'BUKU ARcell',
   tagline: 'Solusi Pulsa, Kuota, Aksesoris & Servis HP',
   storePhone: '081234567890',
   storeAddress: 'Jl. Pemuda No. 88 (Depan Pasar)',
@@ -267,7 +267,12 @@ const Storage = {
   // Settings
   getSettings() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
+      const s = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
+      if (s.storeName === 'KAS ARcell') {
+        s.storeName = 'BUKU ARcell';
+        this.saveSettings(s);
+      }
+      return s;
     } catch {
       return DEFAULT_SETTINGS;
     }

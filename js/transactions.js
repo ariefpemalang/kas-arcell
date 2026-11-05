@@ -1,5 +1,5 @@
 /**
- * transactions.js - Manajemen Transaksi Kas Masuk & Kas Keluar untuk KAS ARcell
+ * transactions.js - Manajemen Transaksi Kas Masuk & Kas Keluar untuk BUKU ARcell
  */
 
 const Transactions = {
@@ -423,7 +423,7 @@ const Transactions = {
 
         <div class="pt-4 text-center text-[11px] text-slate-400">
           <p>Terima kasih atas kepercayaannya.</p>
-          <p>Dicetak otomatis oleh KAS ARcell</p>
+          <p>Dicetak otomatis oleh BUKU ARcell</p>
         </div>
       </div>
     `;

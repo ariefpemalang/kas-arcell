@@ -1,5 +1,5 @@
 /**
- * debts.js - Manajemen Buku Hutang & Piutang untuk KAS ARcell
+ * debts.js - Manajemen Buku Hutang & Piutang untuk BUKU ARcell
  */
 
 const Debts = {

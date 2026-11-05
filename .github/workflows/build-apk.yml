@@ -54,13 +54,13 @@ jobs:
 
       - name: Rename APK
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/KAS-ARcell.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/BUKU-ARcell.apk
 
       - name: Upload Debug APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: KAS-ARcell-APK
-          path: android/app/build/outputs/apk/debug/KAS-ARcell.apk
+          name: BUKU-ARcell-APK
+          path: android/app/build/outputs/apk/debug/BUKU-ARcell.apk
           retention-days: 30
 
       - name: Create or Update GitHub Release with APK
@@ -69,14 +69,14 @@ jobs:
         continue-on-error: true
         with:
           tag_name: latest
-          name: KAS ARcell Mobile APK (Latest)
+          name: BUKU ARcell Mobile APK (Latest)
           body: |
-            ## 📱 KAS ARcell Mobile APK
-            Aplikasi Android APK KAS ARcell siap langsung di-install pada smartphone Android.
+            ## 📱 BUKU ARcell Mobile APK
+            Aplikasi Android APK BUKU ARcell siap langsung di-install pada smartphone Android.
             
             - **Versi:** 1.0.0
             - **Package:** `com.kasarcell.app`
             - **Arsitektur:** Universal (mendukung semua HP Android)
-          files: android/app/build/outputs/apk/debug/KAS-ARcell.apk
+          files: android/app/build/outputs/apk/debug/BUKU-ARcell.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

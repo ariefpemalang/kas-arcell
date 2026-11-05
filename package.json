@@ -1,7 +1,7 @@
 {
   "name": "kas-arcell",
   "version": "1.0.0",
-  "description": "Aplikasi manajemen keuangan dan operasional terpadu konter pulsa dan kasir toko KAS ARcell.",
+  "description": "Aplikasi manajemen keuangan dan operasional terpadu konter pulsa dan kasir toko BUKU ARcell.",
   "main": "index.html",
   "scripts": {
     "build": "node build-web.js",

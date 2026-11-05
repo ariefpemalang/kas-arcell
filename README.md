@@ -1,14 +1,14 @@
-# 📱 KAS ARcell - Aplikasi Pembukuan Kas, Kasir Toko Harian, Hutang & Piutang
+# 📱 BUKU ARcell - Aplikasi Pembukuan Kas, Kasir Toko Harian, Hutang & Piutang
 
-Aplikasi manajemen keuangan dan operasional terpadu khusus konter pulsa, paket data, aksesoris, servis HP, dan kasir toko **"KAS ARcell"**. Menggabungkan sistem kas konter dan pembukuan toko harian dalam 1 aplikasi yang cepat, modern, responsif, dan bekerja secara offline.
+Aplikasi manajemen keuangan dan operasional terpadu khusus konter pulsa, paket data, aksesoris, servis HP, dan kasir toko **"BUKU ARcell"**. Menggabungkan sistem kas konter dan pembukuan toko harian dalam 1 aplikasi yang cepat, modern, responsif, dan bekerja secara offline.
 
 ---
 
 ## 🚀 Cara Membuka / Menggunakan Aplikasi
 
 ### 1. 📱 Install di HP Android (APK)
-- **Download Langsung**: Unduh file APK terbaru di menu **[Releases](https://github.com/ariefpemalang/kas-arcell/releases)** atau tab **[Actions Artifacts](https://github.com/ariefpemalang/kas-arcell/actions)** pada repositori ini.
-- **Install di HP**: Buka file `KAS-ARcell.apk` di HP Android dan pilih *Install*.
+- **Download Langsung**: Unduh file APK terbaru di menu **[Releases](https://github.com/ariefpemalang/BUKU-ARcell/releases)** atau tab **[Actions Artifacts](https://github.com/ariefpemalang/BUKU-ARcell/actions)** pada repositori ini.
+- **Install di HP**: Buka file `BUKU-ARcell.apk` di HP Android dan pilih *Install*.
 - **Build Otomatis (CI/CD)**: Setiap ada update kode yang di-push ke branch `main`, GitHub Actions akan otomatis membuat file APK baru yang siap di-download.
 
 ### 2. 💻 Menggunakan di Komputer / Laptop
@@ -63,4 +63,4 @@ Aplikasi manajemen keuangan dan operasional terpadu khusus konter pulsa, paket d
 
 ---
 
-© 2026 KAS ARcell - Solusi Pembukuan Konter & Toko Terpadu.
+© 2026 BUKU ARcell - Solusi Pembukuan Konter & Toko Terpadu.
