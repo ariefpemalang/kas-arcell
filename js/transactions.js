@@ -151,7 +151,8 @@ const Transactions = {
     const category = document.getElementById('trx-category').value;
     const rawAmount = document.getElementById('trx-amount').value.replace(/[^0-9]/g, '');
     const amount = Number(rawAmount);
-    const paymentMethod = document.getElementById('trx-payment').value;
+    const paymentEl = document.getElementById('trx-payment');
+    const paymentMethod = paymentEl && paymentEl.value ? paymentEl.value : 'Tunai';
     const notes = document.getElementById('trx-notes').value.trim();
 
     if (!date) {
