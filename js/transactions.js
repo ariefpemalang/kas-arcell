@@ -377,6 +377,7 @@ const Transactions = {
     container.innerHTML = `
       <div class="p-6 bg-white border border-slate-200 rounded-2xl max-w-sm mx-auto font-mono text-xs text-slate-800 shadow-sm print:shadow-none print:border-none print:max-w-none">
         <div class="text-center pb-3 border-b border-dashed border-slate-300">
+          <img src="assets/logo.jpg" alt="Logo" class="w-12 h-12 mx-auto mb-2 rounded-2xl object-cover shadow-sm border border-slate-200">
           <h2 class="text-base font-bold tracking-wider text-slate-900">${settings.storeName}</h2>
           <p class="text-[11px] text-slate-500">${settings.tagline || 'Konter Pulsa, Kuota & Servis'}</p>
           <p class="text-[11px] text-slate-500">${settings.storeAddress || ''}</p>

@@ -29,5 +29,8 @@ fs.copyFileSync(path.join(__dirname, 'index.html'), path.join(wwwDir, 'index.htm
 // Copy css and js
 copyDirSync(path.join(__dirname, 'css'), path.join(wwwDir, 'css'));
 copyDirSync(path.join(__dirname, 'js'), path.join(wwwDir, 'js'));
+if (fs.existsSync(path.join(__dirname, 'assets'))) {
+  copyDirSync(path.join(__dirname, 'assets'), path.join(wwwDir, 'assets'));
+}
 
 console.log('Successfully built www directory for mobile packaging.');
