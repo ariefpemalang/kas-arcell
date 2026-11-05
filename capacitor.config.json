@@ -1,0 +1,11 @@
+{
+  "appId": "com.kasarcell.app",
+  "appName": "KAS ARcell",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0284c7"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

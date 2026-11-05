@@ -1,0 +1,23 @@
+{
+  "name": "kas-arcell",
+  "version": "1.0.0",
+  "description": "Aplikasi manajemen keuangan dan operasional terpadu konter pulsa dan kasir toko KAS ARcell.",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build-web.js",
+    "sync": "node build-web.js && npx cap sync android",
+    "cap:add": "node build-web.js && npx cap add android",
+    "open:android": "npx cap open android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ariefpemalang/kas-arcell.git"
+  },
+  "author": "ARcell",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  }
+}

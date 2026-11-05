@@ -4,7 +4,14 @@ Aplikasi manajemen keuangan dan operasional terpadu khusus konter pulsa, paket d
 
 ---
 
-## 🚀 Cara Membuka Aplikasi
+## 🚀 Cara Membuka / Menggunakan Aplikasi
+
+### 1. 📱 Install di HP Android (APK)
+- **Download Langsung**: Unduh file APK terbaru di menu **[Releases](https://github.com/ariefpemalang/kas-arcell/releases)** atau tab **[Actions Artifacts](https://github.com/ariefpemalang/kas-arcell/actions)** pada repositori ini.
+- **Install di HP**: Buka file `KAS-ARcell.apk` di HP Android dan pilih *Install*.
+- **Build Otomatis (CI/CD)**: Setiap ada update kode yang di-push ke branch `main`, GitHub Actions akan otomatis membuat file APK baru yang siap di-download.
+
+### 2. 💻 Menggunakan di Komputer / Laptop
 1. **Klik dua kali file `start.bat`**, ATAU
 2. **Buka file `index.html`** langsung menggunakan browser (Google Chrome, Microsoft Edge, dll).
 
