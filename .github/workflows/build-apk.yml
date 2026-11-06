@@ -24,11 +24,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Setup Java JDK 21
+      - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       - name: Setup Android SDK Permissions & Platform
         run: |
@@ -39,10 +39,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Web Assets & Sync Capacitor
-        run: |
-          npm run build
-          npx cap sync android
+      - name: Build Web Assets
+        run: npm run build
+
+      - name: Copy Web Assets to Android
+        run: npx cap copy android
 
       - name: Grant Execute Permission to Gradlew
         run: chmod +x android/gradlew
@@ -50,7 +51,7 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --stacktrace --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
         run: |
@@ -72,11 +73,19 @@ jobs:
           name: BUKU ARcell Mobile APK (Latest)
           body: |
             ## 📱 BUKU ARcell Mobile APK
-            Aplikasi Android APK BUKU ARcell siap langsung di-install pada smartphone Android.
-            
-            - **Versi:** 1.0.0
+
+            Aplikasi Android BUKU ARcell — kasir & pembukuan toko HP konter.
+
+            ### ✅ Cara Install
+            1. Download file `BUKU-ARcell.apk` di bawah
+            2. Pindahkan ke HP Android
+            3. Buka file APK → Install
+            4. Izinkan "Install dari sumber tidak dikenal" jika diminta
+
+            ### 📋 Info
             - **Package:** `com.kasarcell.app`
-            - **Arsitektur:** Universal (mendukung semua HP Android)
+            - **Min Android:** Android 7.0 (API 24)
+            - **Build:** Debug (tidak perlu keystore)
           files: android/app/build/outputs/apk/debug/BUKU-ARcell.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
