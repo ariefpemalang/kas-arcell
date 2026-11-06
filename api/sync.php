@@ -162,6 +162,23 @@ if ($action === 'ping') {
     exit;
 }
 
+// ACTION: CHECK (Ultra lightweight check for real-time auto-sync between PC and Mobile)
+if ($action === 'check' || $action === 'timestamp') {
+    $db = readDatabase($dbFile);
+    $ts = $db['updatedAt'] ?? '2000-01-01T00:00:00Z';
+    $trxCount = count($db['transactions'] ?? []);
+    $sessCount = count($db['dailySessions'] ?? []);
+    $debtCount = count($db['debts'] ?? []) + count($db['receivables'] ?? []);
+    $hash = md5($ts . '_' . $trxCount . '_' . $sessCount . '_' . $debtCount);
+    echo json_encode([
+        'success' => true,
+        'timestamp' => $ts,
+        'hash' => $hash,
+        'count' => $trxCount
+    ]);
+    exit;
+}
+
 // ACTION: GET DATA
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $db = readDatabase($dbFile);

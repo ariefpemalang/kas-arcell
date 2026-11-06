@@ -1,12 +1,15 @@
 /**
  * js/sync.js - Cloud Database Synchronization Manager for BUKU ARcell
- * Integrasi & Sinkronisasi dua arah dengan server ar-pro.my.id
+ * Integrasi & Sinkronisasi dua arah otomatis antara PC (ar-pro.my.id) dan HP (APK)
  */
 
 const SyncManager = {
   CONFIG_KEY: 'arcell_sync_config',
   isSyncing: false,
   debounceTimer: null,
+  pollingTimer: null,
+  pollingIntervalMs: 10000, // Periksa update setiap 10 detik
+  lastServerHash: null,
 
   defaultConfig: {
     enabled: true,
@@ -14,6 +17,7 @@ const SyncManager = {
     syncKey: 'arcell-sync-2026',
     autoSyncOnChange: true,
     autoSyncOnStartup: true,
+    realtimePolling: true,
     lastSyncTime: null
   },
 
@@ -47,20 +51,38 @@ const SyncManager = {
     const cfg = this.getConfig();
     if (cfg.enabled && cfg.autoSyncOnStartup && this.isOnline()) {
       setTimeout(() => {
-        this.syncNow(false, true); // silent sync
-      }, 1200);
+        this.syncNow(false, true); // initial sync
+      }, 800);
     }
 
-    // Dengarkan event online browser
+    // Mulai auto-polling berkala (real-time sync dari PC ke HP atau sebaliknya)
+    if (cfg.enabled && cfg.realtimePolling !== false) {
+      this.startAutoPolling();
+    }
+
+    // Dengarkan event saat layar HP menyala / tab aktif kembali (Visibility Change & Focus)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.checkServerUpdates();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      this.checkServerUpdates();
+    });
+
+    // Dengarkan event online / offline perangkat
     window.addEventListener('online', () => {
       this.updateUIStatus();
       if (cfg.enabled) {
-        this.syncNow(false);
+        this.syncNow(false, true);
+        this.startAutoPolling();
       }
     });
 
     window.addEventListener('offline', () => {
       this.updateUIStatus();
+      this.stopAutoPolling();
     });
   },
 
@@ -86,13 +108,21 @@ const SyncManager = {
         const syncKey = document.getElementById('cloud-sync-key').value.trim();
         const autoSyncOnChange = document.getElementById('cloud-auto-sync-change').checked;
         const autoSyncOnStartup = document.getElementById('cloud-auto-sync-startup').checked;
+        const realtimePolling = document.getElementById('cloud-auto-sync-polling') ? document.getElementById('cloud-auto-sync-polling').checked : true;
 
         this.saveConfig({
           serverUrl: serverUrl || this.defaultConfig.serverUrl,
           syncKey: syncKey || this.defaultConfig.syncKey,
           autoSyncOnChange,
-          autoSyncOnStartup
+          autoSyncOnStartup,
+          realtimePolling
         });
+
+        if (realtimePolling) {
+          this.startAutoPolling();
+        } else {
+          this.stopAutoPolling();
+        }
 
         if (typeof App !== 'undefined' && App.showToast) {
           App.showToast('Pengaturan sinkronisasi cloud berhasil disimpan!', 'success');
@@ -107,6 +137,54 @@ const SyncManager = {
         this.syncNow(true);
       });
     });
+  },
+
+  startAutoPolling() {
+    this.stopAutoPolling();
+    this.pollingTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.checkServerUpdates();
+      }
+    }, this.pollingIntervalMs);
+  },
+
+  stopAutoPolling() {
+    if (this.pollingTimer) {
+      clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
+    }
+  },
+
+  // Periksa apakah server memiliki data baru (dari PC atau perangkat lain)
+  async checkServerUpdates() {
+    if (this.isSyncing || !this.isOnline()) return;
+    const cfg = this.getConfig();
+    if (!cfg.enabled) return;
+
+    try {
+      const url = `${cfg.serverUrl}?action=check&_t=${Date.now()}`;
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-Sync-Key': cfg.syncKey || ''
+        }
+      });
+
+      if (!res.ok) return;
+
+      const json = await res.json();
+      if (!json || !json.success || !json.hash) return;
+
+      // Jika hash server berbeda dari hash lokal, berarti ada data baru dari PC!
+      if (this.lastServerHash && json.hash !== this.lastServerHash) {
+        console.log('[Sync] Terdeteksi data baru di server ar-pro.my.id, sinkronisasi otomatis...');
+        await this.syncNow(false, true, true); // true = fromRemoteChange
+      } else {
+        this.lastServerHash = json.hash;
+      }
+    } catch (e) {
+      // Abaikan silent error saat polling berkala
+    }
   },
 
   async testConnection() {
@@ -152,20 +230,21 @@ const SyncManager = {
     }
   },
 
+  // Dipanggil otomatis saat user menambah/mengubah data di perangkat ini
   triggerAutoSync() {
     const cfg = this.getConfig();
     if (!cfg.enabled || !cfg.autoSyncOnChange || !this.isOnline()) {
       return;
     }
 
-    // Debounce agar tidak spam server jika user input cepat
+    // Debounce cepat (500ms) agar data segera terkirim ke server
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
-      this.syncNow(false);
-    }, 1500);
+      this.syncNow(false, true);
+    }, 500);
   },
 
-  async syncNow(manual = false, silent = false) {
+  async syncNow(manual = false, silent = false, fromRemoteChange = false) {
     if (this.isSyncing) return;
     const cfg = this.getConfig();
 
@@ -217,18 +296,27 @@ const SyncManager = {
       // Terapkan data hasil gabungan (two-way merged) ke LocalStorage
       if (result.data) {
         Storage.importData(JSON.stringify(result.data));
+
+        // Hitung hash server saat ini agar tidak loop
+        const ts = result.data.updatedAt || new Date().toISOString();
+        const trxCount = (result.data.transactions || []).length;
+        const sessCount = (result.data.dailySessions || []).length;
+        const debtCount = (result.data.debts || []).length + (result.data.receivables || []).length;
+        this.lastServerHash = `${ts}_${trxCount}_${sessCount}_${debtCount}`;
       }
 
       // Catat waktu sukses sinkron
       const now = new Date().toISOString();
       this.saveConfig({ lastSyncTime: now });
 
-      // Refresh tampilan aktif
+      // Refresh tampilan layar yang sedang aktif (Dashboard, Kasir, Hutang, dll.)
       if (typeof App !== 'undefined' && App.renderActiveView) {
         App.renderActiveView();
       }
 
-      if (manual && !silent && typeof App !== 'undefined' && App.showToast) {
+      if (fromRemoteChange && typeof App !== 'undefined' && App.showToast) {
+        App.showToast('📥 Data baru dari server ar-pro.my.id otomatis dimuat!', 'info');
+      } else if (manual && !silent && typeof App !== 'undefined' && App.showToast) {
         App.showToast('✅ Database berhasil disinkronkan dengan ar-pro.my.id!', 'success');
       }
     } catch (err) {
@@ -289,9 +377,9 @@ const SyncManager = {
       } else if (cfg.lastSyncTime) {
         el.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span class="text-[11px] font-semibold text-slate-700 hidden sm:inline">ar-pro.my.id</span>
+          <span class="text-[11px] font-semibold text-slate-700 hidden sm:inline">Realtime</span>
         `;
-        el.title = `Tersinkron dengan ar-pro.my.id (${lastTimeStr})`;
+        el.title = `Tersinkron Real-Time dengan ar-pro.my.id (${lastTimeStr})`;
       } else {
         el.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-sky-400"></span>
@@ -311,7 +399,7 @@ const SyncManager = {
         statusTextEl.textContent = 'Offline (Menggunakan data lokal)';
         if (statusDotEl) statusDotEl.className = 'w-3 h-3 rounded-full bg-amber-500';
       } else if (cfg.lastSyncTime) {
-        statusTextEl.textContent = 'Terhubung & Tersinkron';
+        statusTextEl.textContent = 'Terhubung Real-Time & Tersinkron';
         if (statusDotEl) statusDotEl.className = 'w-3 h-3 rounded-full bg-emerald-500';
       } else {
         statusTextEl.textContent = 'Terhubung (Menunggu sinkronisasi pertama)';
@@ -328,11 +416,13 @@ const SyncManager = {
     const keyInput = document.getElementById('cloud-sync-key');
     const changeCheckbox = document.getElementById('cloud-auto-sync-change');
     const startupCheckbox = document.getElementById('cloud-auto-sync-startup');
+    const pollingCheckbox = document.getElementById('cloud-auto-sync-polling');
 
     if (urlInput && !urlInput.value) urlInput.value = cfg.serverUrl || this.defaultConfig.serverUrl;
     if (keyInput && !keyInput.value) keyInput.value = cfg.syncKey || this.defaultConfig.syncKey;
     if (changeCheckbox) changeCheckbox.checked = cfg.autoSyncOnChange !== false;
     if (startupCheckbox) startupCheckbox.checked = cfg.autoSyncOnStartup !== false;
+    if (pollingCheckbox) pollingCheckbox.checked = cfg.realtimePolling !== false;
   }
 };
 
