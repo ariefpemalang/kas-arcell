@@ -241,11 +241,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Settings (prefer newer or client)
     $merged['settings'] = !empty($clientData['settings']) ? $clientData['settings'] : ($serverData['settings'] ?? []);
 
-    // Categories (union)
-    $catIn = array_unique(array_merge($serverData['categoriesIn'] ?? [], $clientData['categoriesIn'] ?? []));
-    $catOut = array_unique(array_merge($serverData['categoriesOut'] ?? [], $clientData['categoriesOut'] ?? []));
-    $merged['categoriesIn'] = array_values($catIn);
-    $merged['categoriesOut'] = array_values($catOut);
+    // Categories (respect client's explicit list to allow deletions & custom ordering)
+    if (!empty($clientData['categoriesIn']) && is_array($clientData['categoriesIn'])) {
+        $merged['categoriesIn'] = array_values(array_unique($clientData['categoriesIn']));
+    } else {
+        $merged['categoriesIn'] = $serverData['categoriesIn'] ?? [];
+    }
+
+    if (!empty($clientData['categoriesOut']) && is_array($clientData['categoriesOut'])) {
+        $merged['categoriesOut'] = array_values(array_unique($clientData['categoriesOut']));
+    } else {
+        $merged['categoriesOut'] = $serverData['categoriesOut'] ?? [];
+    }
 
     // Merge transactions, receivables, debts, daily sessions
     $merged['transactions'] = mergeEntitiesById($serverData['transactions'] ?? [], $clientData['transactions'] ?? []);

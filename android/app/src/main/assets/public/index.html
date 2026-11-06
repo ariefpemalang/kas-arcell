@@ -1209,7 +1209,48 @@
     </div>
   </div>
 
+    <!-- ======================================================== -->
+  <!-- MODAL: KELOLA KATEGORI (TAMBAH / HAPUS LANGSUNG)        -->
   <!-- ======================================================== -->
+  <div id="category-manage-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-[#18181b] text-white rounded-3xl max-w-sm sm:max-w-md w-full shadow-2xl p-5 border border-zinc-800 space-y-4 fade-in">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-amber-400 text-black flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-tags"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Kelola Kategori</h3>
+            <p id="cat-manage-subtitle" class="text-[11px] text-zinc-400">Pemasukan / Pengeluaran</p>
+          </div>
+        </div>
+        <button type="button" onclick="Transactions.closeCategoryManager()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Input Tambah Kategori Cepat -->
+      <div class="flex gap-2">
+        <input type="text" id="cat-manage-new-input" placeholder="Ketik nama kategori baru..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-amber-400">
+        <button type="button" onclick="Transactions.addCategoryFromManager()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-black font-bold text-xs shadow-md transition active:scale-95 shrink-0">
+          + Tambah
+        </button>
+      </div>
+
+      <!-- Daftar Kategori dengan Tombol Hapus Merah -->
+      <div class="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1" id="cat-manage-list">
+        <!-- Diisi dinamis via Transactions.renderCategoryManagerList() -->
+      </div>
+
+      <div class="pt-2">
+        <button type="button" onclick="Transactions.closeCategoryManager()" class="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold transition">
+          Selesai
+        </button>
+      </div>
+    </div>
+  </div>
+
+<!-- ======================================================== -->
   <!-- MODAL 2: CATAT / EDIT PIUTANG PELANGGAN                  -->
   <!-- ======================================================== -->
   <div id="receivable-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
@@ -1425,12 +1466,12 @@
   </div>
 
   <!-- JavaScript Modules (Force cache refresh) -->
-  <script src="js/storage.js?v=3.3"></script>
-  <script src="js/sync.js?v=3.3"></script>
-  <script src="js/storeSessions.js?v=3.3"></script>
-  <script src="js/transactions.js?v=3.3"></script>
-  <script src="js/debts.js?v=3.3"></script>
-  <script src="js/reports.js?v=3.3"></script>
-  <script src="js/app.js?v=3.3"></script>
+  <script src="js/storage.js?v=3.4"></script>
+  <script src="js/sync.js?v=3.4"></script>
+  <script src="js/storeSessions.js?v=3.4"></script>
+  <script src="js/transactions.js?v=3.4"></script>
+  <script src="js/debts.js?v=3.4"></script>
+  <script src="js/reports.js?v=3.4"></script>
+  <script src="js/app.js?v=3.4"></script>
 </body>
 </html>

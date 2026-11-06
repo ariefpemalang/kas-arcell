@@ -234,12 +234,7 @@ const Transactions = {
         <span class="text-[11px] font-medium text-center mt-1.5 px-0.5 text-zinc-400 group-hover:text-amber-400">Kelola</span>
       `;
       manageCol.addEventListener('click', () => {
-        this.closeModal();
-        App.switchView('settings');
-        setTimeout(() => {
-          const el = document.getElementById(selectedType === 'in' ? 'chips-cat-in' : 'chips-cat-out');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
+        this.openCategoryManager();
       });
       buttonsContainer.appendChild(manageCol);
     }
@@ -404,6 +399,94 @@ const Transactions = {
       } catch (e) {}
     }
     this.saveTransaction();
+  },
+
+  openCategoryManager() {
+    const typeRadio = document.querySelector('input[name="trx-type"]:checked');
+    const type = typeRadio ? typeRadio.value : 'out';
+    const modal = document.getElementById('category-manage-modal');
+    const subtitle = document.getElementById('cat-manage-subtitle');
+    const input = document.getElementById('cat-manage-new-input');
+    if (input) input.value = '';
+
+    if (subtitle) {
+      subtitle.textContent = type === 'in' ? 'Kategori Pemasukan' : 'Kategori Pengeluaran';
+    }
+
+    this.renderCategoryManagerList(type);
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  },
+
+  renderCategoryManagerList(type) {
+    const listEl = document.getElementById('cat-manage-list');
+    if (!listEl) return;
+    const categories = Storage.getCategories(type);
+
+    listEl.innerHTML = '';
+    categories.forEach(cat => {
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition';
+
+      const left = document.createElement('div');
+      left.className = 'flex items-center gap-2.5 overflow-hidden';
+      left.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-zinc-800 text-amber-400 flex items-center justify-center text-xs shrink-0">
+          ${this.getCategoryIcon(cat)}
+        </div>
+        <span class="text-xs font-semibold text-zinc-200 truncate">${cat}</span>
+      `;
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition active:scale-95 shrink-0 ml-2';
+      delBtn.innerHTML = '<i class="fa-solid fa-trash-can text-xs"></i> <span>Hapus</span>';
+      delBtn.addEventListener('click', () => {
+        if (!confirm(`Yakin ingin menghapus kategori "${cat}"?`)) return;
+        App.deleteCategory(type, cat);
+        this.renderCategoryManagerList(type);
+        this.renderCategoryOptions();
+      });
+
+      row.appendChild(left);
+      row.appendChild(delBtn);
+      listEl.appendChild(row);
+    });
+  },
+
+  addCategoryFromManager() {
+    const typeRadio = document.querySelector('input[name="trx-type"]:checked');
+    const type = typeRadio ? typeRadio.value : 'out';
+    const input = document.getElementById('cat-manage-new-input');
+    const val = input ? input.value.trim() : '';
+    if (!val) {
+      App.showToast('Masukkan nama kategori!', 'warning');
+      return;
+    }
+    const list = Storage.getCategories(type);
+    if (list.includes(val)) {
+      App.showToast('Kategori sudah ada!', 'warning');
+      return;
+    }
+    list.push(val);
+    Storage.saveCategories(type, list);
+    input.value = '';
+    this.renderCategoryManagerList(type);
+    this.renderCategoryOptions(val);
+    App.renderCategoryChips(type);
+    App.showToast(`Kategori "${val}" berhasil ditambahkan!`, 'success');
+  },
+
+  closeCategoryManager() {
+    const modal = document.getElementById('category-manage-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    this.renderCategoryOptions();
   },
 
   openModal(trx = null) {

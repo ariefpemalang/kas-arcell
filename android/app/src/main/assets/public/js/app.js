@@ -416,13 +416,24 @@ const App = {
     container.innerHTML = '';
     list.forEach(cat => {
       const chip = document.createElement('span');
-      chip.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 shadow-sm';
-      chip.innerHTML = `
-        <span>${cat}</span>
-        <button onclick="App.deleteCategory('${type}', '${cat.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-rose-500">
-          <i class="fa-solid fa-xmark text-xs"></i>
-        </button>
-      `;
+      chip.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 shadow-sm';
+      
+      const spanText = document.createElement('span');
+      spanText.textContent = cat;
+      chip.appendChild(spanText);
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'text-slate-400 hover:text-rose-500 p-0.5 rounded transition active:scale-90';
+      delBtn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>';
+      delBtn.title = `Hapus ${cat}`;
+      delBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.deleteCategory(type, cat);
+      });
+      chip.appendChild(delBtn);
+
       container.appendChild(chip);
     });
   },

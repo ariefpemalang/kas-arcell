@@ -227,15 +227,6 @@ const Storage = {
     }
     if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES_OUT)) {
       localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(DEFAULT_CATEGORIES_OUT));
-    } else {
-      // Pastikan kategori Pemberian Piutang / Pinjaman selalu ada
-      try {
-        const existingCats = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES_OUT)) || [];
-        if (!existingCats.includes('Pemberian Piutang / Pinjaman')) {
-          existingCats.unshift('Pemberian Piutang / Pinjaman');
-          localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(existingCats));
-        }
-      } catch (e) {}
     }
 
     if (!localStorage.getItem(STORAGE_KEYS.TRANSACTIONS)) {
