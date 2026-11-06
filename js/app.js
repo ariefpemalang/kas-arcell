@@ -82,11 +82,6 @@ const App = {
       this.loadSettingsForm();
     }
 
-    // Otomatis sinkronisasi cloud senyap saat berpindah menu (tanpa pop-up)
-    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
-      SyncManager.syncNow(false, true);
-    }
-
     // Kontrol visibilitas tombol aksi di Header atas
     const headerBtnTrx = document.getElementById('header-btn-trx');
     const headerBtnPiutang = document.getElementById('header-btn-piutang') || document.getElementById('header-btn-rec');

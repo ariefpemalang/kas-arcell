@@ -110,7 +110,6 @@ const SyncManager = {
   },
 
   async testConnection() {
-    const cfg = this.getConfig();
     const btn = document.getElementById('btn-test-cloud-conn');
     const originalText = btn ? btn.innerHTML : '';
     
@@ -120,25 +119,14 @@ const SyncManager = {
     }
 
     try {
-      const url = `${cfg.serverUrl}?action=ping&_t=${Date.now()}`;
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'X-Sync-Key': cfg.syncKey || ''
-        }
-      });
-
-      if (!res.ok) {
-        throw new Error(`Status ${res.status}`);
-      }
-
-      const json = await res.json();
-      if (json && json.success) {
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.client) {
+        const { error } = await SupabaseClient.client.from('categories').select('id').limit(1);
+        if (error) throw error;
         if (typeof App !== 'undefined' && App.showToast) {
-          App.showToast('✅ Koneksi ke ar-pro.my.id berhasil', 'success');
+          App.showToast('✅ Terhubung ke Supabase Realtime (PostgreSQL)', 'success');
         }
       } else {
-        throw new Error(json.message || 'Koneksi ditolak');
+        throw new Error('Supabase client belum siap');
       }
     } catch (err) {
       if (typeof App !== 'undefined' && App.showToast) {
@@ -153,70 +141,28 @@ const SyncManager = {
   },
 
   // SINKRONISASI HANYA BERJALAN SAAT REFRESH & SAAT PINDAH MENU
-  // (Dinonaktifkan sinkronisasi saat mengetik/input biasa agar tidak mengganggu)
   triggerAutoSync() {
     return;
   },
 
   /**
-   * Proses Sinkronisasi Utama Dua Arah
+   * Proses Sinkronisasi Utama Dua Arah via Supabase
    * @param {boolean} manual - jika dipicu manual
    * @param {boolean} silent - selalu senyap tanpa pop-up
    */
   async syncNow(manual = false, silent = true) {
-    if (this.isSyncing || !this.isOnline()) {
-      this.updateUIStatus();
-      return;
-    }
-
-    const cfg = this.getConfig();
+    if (this.isSyncing) return;
     this.isSyncing = true;
     this.setSyncingState(true);
 
     try {
-      // Ambil data lokal
-      const localDataJson = Storage.exportAllData();
-      const localData = JSON.parse(localDataJson);
-
-      const payload = {
-        clientTimestamp: new Date().toISOString(),
-        data: localData
-      };
-
-      const res = await fetch(cfg.serverUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Sync-Key': cfg.syncKey || ''
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pullAllData) {
+        await SupabaseClient.pullAllData();
       }
-
-      const result = await res.json();
-      if (!result || !result.success) {
-        throw new Error(result?.message || 'Gagal sinkron');
-      }
-
-      // Terapkan data gabungan terbaru ke penyimpanan lokal
-      if (result.data) {
-        Storage.importData(JSON.stringify(result.data));
-      }
-
-      // Catat waktu sukses sinkron
       const now = new Date().toISOString();
       this.saveConfig({ lastSyncTime: now });
-
-      // Refresh tampilan aktif secara senyap tanpa notifikasi/pop-up
-      if (typeof App !== 'undefined' && App.currentView) {
-        if (App.currentView === 'dashboard') App.refreshDashboard();
-        else if (App.currentView === 'transactions') Transactions.renderTable();
-        else if (App.currentView === 'debts') { Debts.renderReceivablesTable(); Debts.renderDebtsTable(); }
-        else if (App.currentView === 'storeSessions') { StoreSessions.renderSessionState(); StoreSessions.renderTableAndStats(); }
-        else if (App.currentView === 'reports') Reports.updateReport();
+      if (!silent && typeof App !== 'undefined' && App.showToast) {
+        App.showToast('✅ Sinkronisasi Supabase Realtime berhasil', 'success');
       }
     } catch (err) {
       console.warn('[Sync]', err.message);

@@ -260,11 +260,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $merged['categoriesOut'] = array_values(array_unique(array_diff($catOut, $deletedCats)));
     $merged['deletedCategories'] = array_values($deletedCats);
 
-    // Merge transactions, receivables, debts, daily sessions
-    $merged['transactions'] = mergeEntitiesById($serverData['transactions'] ?? [], $clientData['transactions'] ?? []);
-    $merged['receivables'] = mergeEntitiesById($serverData['receivables'] ?? [], $clientData['receivables'] ?? []);
-    $merged['debts'] = mergeEntitiesById($serverData['debts'] ?? [], $clientData['debts'] ?? []);
-    $merged['dailySessions'] = mergeEntitiesById($serverData['dailySessions'] ?? [], $clientData['dailySessions'] ?? []);
+    // Save client data directly without reviving deleted items
+    $merged['transactions'] = $clientData['transactions'] ?? [];
+    $merged['receivables'] = $clientData['receivables'] ?? [];
+    $merged['debts'] = $clientData['debts'] ?? [];
+    $merged['dailySessions'] = $clientData['dailySessions'] ?? [];
 
     // Active session: keep newest active or latest closed
     $clientAct = $clientData['activeSession'] ?? null;
