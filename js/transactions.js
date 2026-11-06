@@ -223,6 +223,25 @@ const Transactions = {
 
         buttonsContainer.appendChild(col);
       });
+
+      // Tombol Kelola Kategori (Tambah / Hapus) di akhir grid
+      const manageCol = document.createElement('div');
+      manageCol.className = 'flex flex-col items-center cursor-pointer group select-none';
+      manageCol.innerHTML = `
+        <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-zinc-800/80 border border-dashed border-zinc-600 text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-400 flex items-center justify-center text-base sm:text-lg transition-all" title="Kelola Kategori (Tambah / Hapus)">
+          <i class="fa-solid fa-gear"></i>
+        </div>
+        <span class="text-[11px] font-medium text-center mt-1.5 px-0.5 text-zinc-400 group-hover:text-amber-400">Kelola</span>
+      `;
+      manageCol.addEventListener('click', () => {
+        this.closeModal();
+        App.switchView('settings');
+        setTimeout(() => {
+          const el = document.getElementById(selectedType === 'in' ? 'chips-cat-in' : 'chips-cat-out');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      });
+      buttonsContainer.appendChild(manageCol);
     }
 
     // Update filter dropdown di tabel riwayat transaksi (tetap dropdown biasa)

@@ -447,6 +447,7 @@ const App = {
   },
 
   deleteCategory(type, cat) {
+    if (!confirm(`Hapus kategori "${cat}"?`)) return;
     let list = Storage.getCategories(type);
     if (list.length <= 1) {
       this.showToast('Minimal harus ada satu kategori!', 'warning');
@@ -456,7 +457,7 @@ const App = {
     Storage.saveCategories(type, list);
     this.renderCategoryChips(type);
     Transactions.renderCategoryOptions();
-    this.showToast('Kategori dihapus.', 'info');
+    this.showToast(`Kategori "${cat}" berhasil dihapus.`, 'info');
   },
 
   exportBackupFile() {
