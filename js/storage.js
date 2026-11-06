@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   SETTINGS: 'arcell_settings',
   CATEGORIES_IN: 'arcell_cat_in',
   CATEGORIES_OUT: 'arcell_cat_out',
+  DELETED_CATEGORIES: 'arcell_deleted_categories',
   DAILY_SESSIONS: 'arcell_daily_sessions', // Pembukuan Harian Toko (Buka/Tutup)
   ACTIVE_SESSION: 'arcell_active_session'  // Sesi Toko yang Sedang Aktif
 };
@@ -279,18 +280,44 @@ const Storage = {
     this._notifyChange();
   },
 
+  // Categories Deleted List (Blacklist)
+  getDeletedCategories() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_CATEGORIES)) || [];
+    } catch {
+      return [];
+    }
+  },
+  recordDeletedCategory(cat) {
+    const list = this.getDeletedCategories();
+    if (!list.includes(cat)) {
+      list.push(cat);
+      localStorage.setItem(STORAGE_KEYS.DELETED_CATEGORIES, JSON.stringify(list));
+    }
+  },
+  unmarkDeletedCategory(cat) {
+    let list = this.getDeletedCategories();
+    list = list.filter(c => c !== cat);
+    localStorage.setItem(STORAGE_KEYS.DELETED_CATEGORIES, JSON.stringify(list));
+  },
+
   // Categories
   getCategories(type = 'in') {
     const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
+    const deleted = this.getDeletedCategories();
     try {
-      return JSON.parse(localStorage.getItem(key)) || (type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT);
+      const raw = JSON.parse(localStorage.getItem(key)) || (type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT);
+      return raw.filter(c => !deleted.includes(c));
     } catch {
-      return type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT;
+      const def = type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT;
+      return def.filter(c => !deleted.includes(c));
     }
   },
   saveCategories(type, list) {
     const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
-    localStorage.setItem(key, JSON.stringify(list));
+    const deleted = this.getDeletedCategories();
+    const cleanList = (list || []).filter(c => !deleted.includes(c));
+    localStorage.setItem(key, JSON.stringify(cleanList));
     this._notifyChange();
   },
 
@@ -694,6 +721,7 @@ const Storage = {
       settings: this.getSettings(),
       categoriesIn: this.getCategories('in'),
       categoriesOut: this.getCategories('out'),
+      deletedCategories: this.getDeletedCategories(),
       transactions: this.getTransactions(),
       receivables: this.getReceivables(),
       debts: this.getDebts(),
@@ -706,12 +734,19 @@ const Storage = {
   importData(jsonString) {
     try {
       const data = JSON.parse(jsonString);
+      const deleted = this.getDeletedCategories();
       if (data.transactions) localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(data.transactions));
       if (data.receivables) localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(data.receivables));
       if (data.debts) localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(data.debts));
       if (data.settings) localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(data.settings));
-      if (data.categoriesIn) localStorage.setItem(STORAGE_KEYS.CATEGORIES_IN, JSON.stringify(data.categoriesIn));
-      if (data.categoriesOut) localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(data.categoriesOut));
+      if (data.categoriesIn && Array.isArray(data.categoriesIn)) {
+        const cleanIn = data.categoriesIn.filter(c => !deleted.includes(c));
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES_IN, JSON.stringify(cleanIn));
+      }
+      if (data.categoriesOut && Array.isArray(data.categoriesOut)) {
+        const cleanOut = data.categoriesOut.filter(c => !deleted.includes(c));
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(cleanOut));
+      }
       if (data.dailySessions) localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify(data.dailySessions));
       if (data.activeSession) localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(data.activeSession));
       return { success: true };

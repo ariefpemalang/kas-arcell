@@ -440,9 +440,10 @@ const App = {
 
   addNewCategory(type) {
     const input = document.getElementById(type === 'in' ? 'input-new-cat-in' : 'input-new-cat-out');
-    const val = input.value.trim();
+    const val = input ? input.value.trim() : '';
     if (!val) return;
 
+    Storage.unmarkDeletedCategory(val);
     const list = Storage.getCategories(type);
     if (list.includes(val)) {
       this.showToast('Kategori sudah ada!', 'warning');
@@ -451,23 +452,25 @@ const App = {
 
     list.push(val);
     Storage.saveCategories(type, list);
-    input.value = '';
+    if (input) input.value = '';
     this.renderCategoryChips(type);
-    Transactions.renderCategoryOptions();
+    Transactions.renderCategoryOptions(val);
+    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
+      SyncManager.syncNow(false, true);
+    }
     this.showToast('Kategori berhasil ditambahkan!', 'success');
   },
 
   deleteCategory(type, cat) {
-    if (!confirm(`Hapus kategori "${cat}"?`)) return;
+    Storage.recordDeletedCategory(cat);
     let list = Storage.getCategories(type);
-    if (list.length <= 1) {
-      this.showToast('Minimal harus ada satu kategori!', 'warning');
-      return;
-    }
     list = list.filter(c => c !== cat);
     Storage.saveCategories(type, list);
     this.renderCategoryChips(type);
     Transactions.renderCategoryOptions();
+    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
+      SyncManager.syncNow(false, true);
+    }
     this.showToast(`Kategori "${cat}" berhasil dihapus.`, 'info');
   },
 

@@ -241,18 +241,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Settings (prefer newer or client)
     $merged['settings'] = !empty($clientData['settings']) ? $clientData['settings'] : ($serverData['settings'] ?? []);
 
-    // Categories (respect client's explicit list to allow deletions & custom ordering)
+    // Categories & Deleted Categories Blacklist
+    $deletedCats = array_unique(array_merge($serverData['deletedCategories'] ?? [], $clientData['deletedCategories'] ?? []));
+    
     if (!empty($clientData['categoriesIn']) && is_array($clientData['categoriesIn'])) {
-        $merged['categoriesIn'] = array_values(array_unique($clientData['categoriesIn']));
+        $catIn = $clientData['categoriesIn'];
     } else {
-        $merged['categoriesIn'] = $serverData['categoriesIn'] ?? [];
+        $catIn = $serverData['categoriesIn'] ?? [];
+    }
+    
+    if (!empty($clientData['categoriesOut']) && is_array($clientData['categoriesOut'])) {
+        $catOut = $clientData['categoriesOut'];
+    } else {
+        $catOut = $serverData['categoriesOut'] ?? [];
     }
 
-    if (!empty($clientData['categoriesOut']) && is_array($clientData['categoriesOut'])) {
-        $merged['categoriesOut'] = array_values(array_unique($clientData['categoriesOut']));
-    } else {
-        $merged['categoriesOut'] = $serverData['categoriesOut'] ?? [];
-    }
+    $merged['categoriesIn'] = array_values(array_unique(array_diff($catIn, $deletedCats)));
+    $merged['categoriesOut'] = array_values(array_unique(array_diff($catOut, $deletedCats)));
+    $merged['deletedCategories'] = array_values($deletedCats);
 
     // Merge transactions, receivables, debts, daily sessions
     $merged['transactions'] = mergeEntitiesById($serverData['transactions'] ?? [], $clientData['transactions'] ?? []);

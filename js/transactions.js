@@ -466,6 +466,7 @@ const Transactions = {
       App.showToast('Masukkan nama kategori!', 'warning');
       return;
     }
+    Storage.unmarkDeletedCategory(val);
     const list = Storage.getCategories(type);
     if (list.includes(val)) {
       App.showToast('Kategori sudah ada!', 'warning');
@@ -477,6 +478,9 @@ const Transactions = {
     this.renderCategoryManagerList(type);
     this.renderCategoryOptions(val);
     App.renderCategoryChips(type);
+    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
+      SyncManager.syncNow(false, true);
+    }
     App.showToast(`Kategori "${val}" berhasil ditambahkan!`, 'success');
   },
 
