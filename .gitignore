@@ -10,7 +10,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Android build outputs
+# Archives
+*.zip
+*.tar.gz
 android/app/build/
 android/.gradle/
 android/local.properties
