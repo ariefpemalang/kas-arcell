@@ -81,6 +81,58 @@ const Transactions = {
       startDateInput.addEventListener('change', handleDateChange);
       endDateInput.addEventListener('change', handleDateChange);
     }
+
+    // Keyboard fisik untuk mode PC / Laptop (Numpad & Tombol Angka)
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('transaction-modal');
+      if (!modal || modal.classList.contains('hidden')) return;
+
+      const activeEl = document.activeElement;
+      const isNotes = activeEl && activeEl.id === 'trx-notes';
+
+      // Jika kursor sedang di dalam kolom Catatan
+      if (isNotes) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          activeEl.blur();
+          this.submitKeypad();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          activeEl.blur();
+        }
+        return; // Biarkan pengetikan huruf/angka normal di catatan
+      }
+
+      // Jika ada input teks/select lain yang sedang fokus, abaikan
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      // Tombol Angka (0-9) baik dari keyboard utama maupun Numpad fisik
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        this.pressKey(e.key);
+        this.animateKeyButton(e.key);
+      } else if (e.key === '+' || e.key === '-') {
+        e.preventDefault();
+        this.pressOp(e.key);
+        this.animateKeyButton(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        this.backspace();
+        this.animateKeyButton('backspace');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        this.animateKeyButton('enter');
+        this.submitKeypad();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        this.closeModal();
+      } else if (e.key.toLowerCase() === 'c' || e.key === 'Delete') {
+        e.preventDefault();
+        this.resetKeypad();
+      }
+    });
   },
 
   getCategoryIcon(cat) {
@@ -252,6 +304,16 @@ const Transactions = {
     this.updateKeypadDisplay();
   },
 
+  animateKeyButton(k) {
+    const btn = document.querySelector(`button[data-k="${k}"]`);
+    if (btn) {
+      btn.classList.add('brightness-150', 'ring-2', 'ring-amber-400');
+      setTimeout(() => {
+        btn.classList.remove('brightness-150', 'ring-2', 'ring-amber-400');
+      }, 120);
+    }
+  },
+
   updateKeypadDisplay() {
     const dispAmount = document.getElementById('trx-display-amount');
     const dispCalc = document.getElementById('trx-display-calc');
@@ -351,6 +413,10 @@ const Transactions = {
 
     this.updateKeypadDisplay();
     this.updateDateLabel();
+
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');

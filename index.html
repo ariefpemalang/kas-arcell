@@ -1174,33 +1174,33 @@
           <!-- Keypad Numpad Default (4x4 Grid) -->
           <div class="grid grid-cols-4 gap-1.5 select-none pt-0.5">
             <!-- Baris 1: 7, 8, 9, Hari ini -->
-            <button type="button" onclick="Transactions.pressKey('7')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">7</button>
-            <button type="button" onclick="Transactions.pressKey('8')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">8</button>
-            <button type="button" onclick="Transactions.pressKey('9')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">9</button>
+            <button type="button" data-k="7" onclick="Transactions.pressKey('7')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">7</button>
+            <button type="button" data-k="8" onclick="Transactions.pressKey('8')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">8</button>
+            <button type="button" data-k="9" onclick="Transactions.pressKey('9')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">9</button>
             <button type="button" id="btn-trx-date-picker" onclick="Transactions.openDatePicker()" class="py-3 sm:py-3.5 px-1 rounded-xl bg-[#202024] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-amber-400 font-semibold text-xs transition flex items-center justify-center gap-1 truncate" title="Pilih Tanggal">
               <i class="fa-regular fa-calendar text-xs"></i>
               <span id="label-trx-date">Hari ini</span>
             </button>
 
             <!-- Baris 2: 4, 5, 6, + -->
-            <button type="button" onclick="Transactions.pressKey('4')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">4</button>
-            <button type="button" onclick="Transactions.pressKey('5')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">5</button>
-            <button type="button" onclick="Transactions.pressKey('6')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">6</button>
-            <button type="button" onclick="Transactions.pressOp('+')" class="py-3 sm:py-3.5 rounded-xl bg-[#202024] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-lg transition flex items-center justify-center">+</button>
+            <button type="button" data-k="4" onclick="Transactions.pressKey('4')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">4</button>
+            <button type="button" data-k="5" onclick="Transactions.pressKey('5')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">5</button>
+            <button type="button" data-k="6" onclick="Transactions.pressKey('6')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">6</button>
+            <button type="button" data-k="+" onclick="Transactions.pressOp('+')" class="py-3 sm:py-3.5 rounded-xl bg-[#202024] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-lg transition flex items-center justify-center">+</button>
 
             <!-- Baris 3: 1, 2, 3, - -->
-            <button type="button" onclick="Transactions.pressKey('1')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">1</button>
-            <button type="button" onclick="Transactions.pressKey('2')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">2</button>
-            <button type="button" onclick="Transactions.pressKey('3')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">3</button>
-            <button type="button" onclick="Transactions.pressOp('-')" class="py-3 sm:py-3.5 rounded-xl bg-[#202024] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-lg transition flex items-center justify-center">-</button>
+            <button type="button" data-k="1" onclick="Transactions.pressKey('1')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">1</button>
+            <button type="button" data-k="2" onclick="Transactions.pressKey('2')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">2</button>
+            <button type="button" data-k="3" onclick="Transactions.pressKey('3')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">3</button>
+            <button type="button" data-k="-" onclick="Transactions.pressOp('-')" class="py-3 sm:py-3.5 rounded-xl bg-[#202024] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-lg transition flex items-center justify-center">-</button>
 
             <!-- Baris 4: 0, 000, ⌫, ✓ -->
-            <button type="button" onclick="Transactions.pressKey('0')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">0</button>
-            <button type="button" onclick="Transactions.pressKey('000')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-xs transition flex items-center justify-center">000</button>
-            <button type="button" onclick="Transactions.backspace()" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-base transition flex items-center justify-center" title="Hapus">
+            <button type="button" data-k="0" onclick="Transactions.pressKey('0')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-lg transition flex items-center justify-center">0</button>
+            <button type="button" data-k="000" onclick="Transactions.pressKey('000')" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-white font-bold text-xs transition flex items-center justify-center">000</button>
+            <button type="button" data-k="backspace" onclick="Transactions.backspace()" class="py-3 sm:py-3.5 rounded-xl bg-[#27272a] hover:bg-zinc-700 active:bg-zinc-600 active:scale-95 text-zinc-300 font-bold text-base transition flex items-center justify-center" title="Hapus (Backspace)">
               <i class="fa-solid fa-delete-left"></i>
             </button>
-            <button type="button" onclick="Transactions.submitKeypad()" class="py-3 sm:py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-95 text-white font-black text-xl shadow-lg shadow-emerald-500/25 transition flex items-center justify-center" title="Simpan Transaksi">
+            <button type="button" data-k="enter" onclick="Transactions.submitKeypad()" class="py-3 sm:py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 active:scale-95 text-white font-black text-xl shadow-lg shadow-emerald-500/25 transition flex items-center justify-center" title="Simpan Transaksi (Enter)">
               <i class="fa-solid fa-check"></i>
             </button>
           </div>
@@ -1425,12 +1425,12 @@
   </div>
 
   <!-- JavaScript Modules (Force cache refresh) -->
-  <script src="js/storage.js?v=3.1"></script>
-  <script src="js/sync.js?v=3.1"></script>
-  <script src="js/storeSessions.js?v=3.1"></script>
-  <script src="js/transactions.js?v=3.1"></script>
-  <script src="js/debts.js?v=3.1"></script>
-  <script src="js/reports.js?v=3.1"></script>
-  <script src="js/app.js?v=3.1"></script>
+  <script src="js/storage.js?v=3.2"></script>
+  <script src="js/sync.js?v=3.2"></script>
+  <script src="js/storeSessions.js?v=3.2"></script>
+  <script src="js/transactions.js?v=3.2"></script>
+  <script src="js/debts.js?v=3.2"></script>
+  <script src="js/reports.js?v=3.2"></script>
+  <script src="js/app.js?v=3.2"></script>
 </body>
 </html>
