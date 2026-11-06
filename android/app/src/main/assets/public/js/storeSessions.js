@@ -156,17 +156,25 @@ const StoreSessions = {
       const inputSaldoAwal = document.getElementById('input-saldo-awal-sesi');
 
       if (sessions.length > 0) {
-        const lastSession = sessions[sessions.length - 1];
-        const saldoAkhirKemarin = lastSession.saldoAkhir || 0;
-        if (inputSaldoAwal && !inputSaldoAwal.value) {
+        // Urutkan berdasarkan tanggal terbaru menurun
+        const sorted = [...sessions].sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+        const lastSession = sorted[0];
+        const saldoAkhirKemarin = Number(lastSession.saldoAkhir || 0);
+
+        if (inputSaldoAwal) {
           inputSaldoAwal.value = saldoAkhirKemarin > 0 ? App.formatNumberOnly(saldoAkhirKemarin) : '';
         }
         if (infoKemarinEl) {
           infoKemarinEl.innerHTML = `
-            <span class="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-[11px]">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-              Otomatis terisi dari Saldo Akhir sesi kemarin (${lastSession.tanggal}): ${App.formatCurrency(saldoAkhirKemarin)}
-            </span>
+            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span class="inline-flex items-center gap-1.5 text-emerald-800 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs shadow-xs">
+                <i class="fa-solid fa-wand-magic-sparkles text-emerald-500"></i>
+                Saldo Akhir Kemarin (${lastSession.tanggal}): <strong class="text-emerald-900 font-extrabold">${App.formatCurrency(saldoAkhirKemarin)}</strong>
+              </span>
+              <button type="button" onclick="document.getElementById('input-saldo-awal-sesi').value = '${App.formatNumberOnly(saldoAkhirKemarin)}'; App.showToast('Saldo awal disetel: ${App.formatCurrency(saldoAkhirKemarin)}', 'info');" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1.5 rounded-xl border border-indigo-200 active:scale-95 transition flex items-center gap-1">
+                <i class="fa-solid fa-check"></i> Gunakan
+              </button>
+            </div>
           `;
         }
       } else {

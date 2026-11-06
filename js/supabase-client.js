@@ -150,7 +150,7 @@ const SupabaseClient = {
       }
 
       // 5. Daily Sessions
-      const { data: sessions, error: errSess } = await this.client.from('daily_sessions').select('*');
+      const { data: sessions, error: errSess } = await this.client.from('daily_sessions').select('*').order('tanggal', { ascending: true });
       if (!errSess && Array.isArray(sessions)) {
         const mappedSessions = sessions.map(s => ({
           id: s.id,
