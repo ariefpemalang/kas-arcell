@@ -40,8 +40,8 @@ jobs:
       - name: Build Web Assets
         run: npm run build
 
-      - name: Copy Web Assets to Android
-        run: npx cap copy android
+      - name: Sync Capacitor Android
+        run: npx cap sync android
 
       - name: Grant Execute Permission to Gradlew
         run: chmod +x android/gradlew
