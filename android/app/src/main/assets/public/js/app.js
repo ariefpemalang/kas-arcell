@@ -438,9 +438,9 @@ const App = {
     });
   },
 
-  addNewCategory(type) {
+  addNewCategory(type, explicitVal = null) {
     const input = document.getElementById(type === 'in' ? 'input-new-cat-in' : 'input-new-cat-out');
-    const val = input ? input.value.trim() : '';
+    const val = (explicitVal !== null ? explicitVal : (input ? input.value.trim() : '')).trim();
     if (!val) return;
 
     const list = Storage.getCategories(type);
@@ -454,10 +454,12 @@ const App = {
     if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushCategoryAdd) {
       SupabaseClient.pushCategoryAdd(val, type);
     }
-    if (input) input.value = '';
+    if (input && explicitVal === null) input.value = '';
     this.renderCategoryChips(type);
-    Transactions.renderCategoryOptions(val);
-    this.showToast('Kategori berhasil ditambahkan!', 'success');
+    if (typeof Transactions !== 'undefined') {
+      Transactions.renderCategoryOptions(val);
+    }
+    this.showToast(`Kategori "${val}" berhasil ditambahkan!`, 'success');
   },
 
   deleteCategory(type, cat) {

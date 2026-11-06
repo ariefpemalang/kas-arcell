@@ -86,6 +86,15 @@ const SupabaseClient = {
         const outCats = cats.filter(c => c.type === 'out').map(c => c.name);
         if (inCats.length > 0) localStorage.setItem(STORAGE_KEYS.CATEGORIES_IN, JSON.stringify(inCats));
         if (outCats.length > 0) localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(outCats));
+
+        // Re-render kategori seketika di layar
+        if (typeof App !== 'undefined') {
+          App.renderCategoryChips('in');
+          App.renderCategoryChips('out');
+        }
+        if (typeof Transactions !== 'undefined') {
+          Transactions.renderCategoryOptions();
+        }
       }
 
       // 2. Transactions
@@ -191,8 +200,8 @@ const SupabaseClient = {
     this.realtimeChannel = this.client
       .channel('arcell-realtime-all')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, payload => {
-        console.log('⚡ [Realtime] Category change:', payload.eventType);
-        this.handleCategoryRealtime(payload);
+        console.log('⚡ [Realtime] Category change:', payload);
+        this.pullCategoriesOnly();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, payload => {
         console.log('⚡ [Realtime] Transaction change:', payload.eventType);
@@ -222,55 +231,28 @@ const SupabaseClient = {
       });
   },
 
-  // Realtime Handlers
-  handleCategoryRealtime(payload) {
-    const { eventType, new: newRow, old: oldRow } = payload;
-    const type = (newRow ? newRow.type : oldRow ? oldRow.type : null);
-    if (!type) return;
-
-    const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
-
-    if (eventType === 'INSERT') {
-      if (!list.includes(newRow.name)) {
-        list.push(newRow.name);
-        localStorage.setItem(key, JSON.stringify(list));
-      }
-    } else if (eventType === 'DELETE') {
-      if (oldRow && oldRow.name) {
-        list = list.filter(c => c !== oldRow.name);
-        localStorage.setItem(key, JSON.stringify(list));
-      } else {
-        // Fallback: re-fetch categories
-        this.pullCategoriesOnly();
-        return;
-      }
-    }
-
-    if (typeof App !== 'undefined' && App.renderCategoryChips) {
-      App.renderCategoryChips(type);
-    }
-    if (typeof Transactions !== 'undefined' && Transactions.renderCategoryOptions) {
-      Transactions.renderCategoryOptions();
-    }
-  },
-
   async pullCategoriesOnly() {
     if (!this.client) return;
-    const { data: cats } = await this.client.from('categories').select('*').order('id', { ascending: true });
-    if (cats) {
-      const inCats = cats.filter(c => c.type === 'in').map(c => c.name);
-      const outCats = cats.filter(c => c.type === 'out').map(c => c.name);
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES_IN, JSON.stringify(inCats));
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(outCats));
-      if (typeof App !== 'undefined') {
-        App.renderCategoryChips('in');
-        App.renderCategoryChips('out');
+    try {
+      const { data: cats, error } = await this.client.from('categories').select('*').order('id', { ascending: true });
+      if (!error && Array.isArray(cats) && cats.length > 0) {
+        const inCats = cats.filter(c => c.type === 'in').map(c => c.name);
+        const outCats = cats.filter(c => c.type === 'out').map(c => c.name);
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES_IN, JSON.stringify(inCats));
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES_OUT, JSON.stringify(outCats));
+
+        if (typeof App !== 'undefined') {
+          App.renderCategoryChips('in');
+          App.renderCategoryChips('out');
+        }
+        if (typeof Transactions !== 'undefined') {
+          Transactions.renderCategoryOptions();
+          const activeType = document.querySelector('input[name="trx-type"]:checked')?.value || 'out';
+          Transactions.renderCategoryManagerList(activeType);
+        }
       }
-      if (typeof Transactions !== 'undefined') {
-        Transactions.renderCategoryOptions();
-      }
+    } catch(e) {
+      console.warn('[Supabase] pullCategoriesOnly error:', e);
     }
   },
 
@@ -407,6 +389,15 @@ const SupabaseClient = {
     else if (App.currentView === 'debts' && typeof Debts !== 'undefined') { Debts.renderReceivablesTable(); Debts.renderDebtsTable(); }
     else if (App.currentView === 'storeSessions' && typeof StoreSessions !== 'undefined') { StoreSessions.renderSessionState(); StoreSessions.renderTableAndStats(); }
     else if (App.currentView === 'reports' && typeof Reports !== 'undefined') Reports.updateReport();
+
+    // Re-render categories if relevant
+    if (typeof App.renderCategoryChips === 'function') {
+      App.renderCategoryChips('in');
+      App.renderCategoryChips('out');
+    }
+    if (typeof Transactions !== 'undefined' && typeof Transactions.renderCategoryOptions === 'function') {
+      Transactions.renderCategoryOptions();
+    }
   },
 
   // ==========================================
@@ -416,6 +407,7 @@ const SupabaseClient = {
     if (!this.client) return;
     try {
       await this.client.from('categories').insert({ name, type });
+      console.log('✅ [Supabase] Category added:', name, type);
     } catch(e) { console.error('[Supabase] pushCategoryAdd failed:', e); }
   },
 
@@ -423,6 +415,7 @@ const SupabaseClient = {
     if (!this.client) return;
     try {
       await this.client.from('categories').delete().eq('name', name).eq('type', type);
+      console.log('✅ [Supabase] Category deleted:', name, type);
     } catch(e) { console.error('[Supabase] pushCategoryDelete failed:', e); }
   },
 

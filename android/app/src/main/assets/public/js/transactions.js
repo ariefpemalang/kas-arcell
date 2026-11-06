@@ -38,6 +38,14 @@ const Transactions = {
     });
 
     // Date input change listener
+    const notesInput = document.getElementById('trx-notes');
+    const clearNotesBtn = document.getElementById('btn-clear-trx-notes');
+    if (notesInput && clearNotesBtn) {
+      notesInput.addEventListener('input', () => {
+        clearNotesBtn.classList.toggle('hidden', !notesInput.value.trim());
+      });
+    }
+
     const dateInput = document.getElementById('trx-date');
     if (dateInput) {
       dateInput.addEventListener('change', () => {
@@ -466,22 +474,10 @@ const Transactions = {
       App.showToast('Masukkan nama kategori!', 'warning');
       return;
     }
-    Storage.unmarkDeletedCategory(val);
-    const list = Storage.getCategories(type);
-    if (list.includes(val)) {
-      App.showToast('Kategori sudah ada!', 'warning');
-      return;
-    }
-    list.push(val);
-    Storage.saveCategories(type, list);
+    App.addNewCategory(type, val);
     input.value = '';
     this.renderCategoryManagerList(type);
     this.renderCategoryOptions(val);
-    App.renderCategoryChips(type);
-    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
-      SyncManager.syncNow(false, true);
-    }
-    App.showToast(`Kategori "${val}" berhasil ditambahkan!`, 'success');
   },
 
   closeCategoryManager() {
@@ -519,6 +515,10 @@ const Transactions = {
 
     this.updateKeypadDisplay();
     this.updateDateLabel();
+    const clearNotesBtn = document.getElementById('btn-clear-trx-notes');
+    if (clearNotesBtn) {
+      clearNotesBtn.classList.toggle('hidden', !document.getElementById('trx-notes').value.trim());
+    }
 
     if (document.activeElement && typeof document.activeElement.blur === 'function') {
       document.activeElement.blur();

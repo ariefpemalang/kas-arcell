@@ -1162,14 +1162,21 @@
             </div>
           </div>
 
-          <!-- Baris Catatan (Otomatis memunculkan keyboard QWERTY teks saat diklik) -->
-          <div class="flex items-center bg-[#202024] border border-zinc-700/60 rounded-xl px-3 py-2 text-xs focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 transition">
-            <span class="text-zinc-400 mr-2 shrink-0 font-medium">Catatan :</span>
-            <input type="text" id="trx-notes" placeholder="Masukkan catatan..." class="bg-transparent text-white placeholder-zinc-500 w-full focus:outline-none text-xs">
-            <span class="text-zinc-500 ml-2 shrink-0">
-              <i class="fa-regular fa-pen-to-square"></i>
-            </span>
-          </div>
+          <!-- Baris Catatan Elegan & Proporsional -->
+            <div class="relative flex items-center bg-gradient-to-r from-zinc-800/95 via-zinc-800/80 to-zinc-900/95 border border-zinc-700/80 rounded-2xl px-3.5 py-2.5 sm:py-3 shadow-inner focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all duration-200 group">
+              <!-- Icon Catatan dengan aksen bulat halus -->
+              <div class="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 text-amber-400 flex items-center justify-center text-xs shrink-0 mr-2.5 transition-transform group-focus-within:scale-105 shadow-sm">
+                <i class="fa-solid fa-pen-nib"></i>
+              </div>
+
+              <!-- Input Catatan Luas & Proporsional -->
+              <input type="text" id="trx-notes" placeholder="Tulis catatan (cth: Paket Data 50GB, Token 100rb)..." class="bg-transparent text-white placeholder-zinc-500 w-full focus:outline-none text-sm font-medium tracking-wide">
+
+              <!-- Tombol Hapus Cepat (X) yang muncul saat ada teks -->
+              <button type="button" id="btn-clear-trx-notes" onclick="document.getElementById('trx-notes').value = ''; this.classList.add('hidden'); document.getElementById('trx-notes').focus();" class="hidden w-6 h-6 rounded-full bg-zinc-700 hover:bg-zinc-600 text-zinc-300 hover:text-white flex items-center justify-center text-xs shrink-0 ml-1.5 transition active:scale-90" title="Bersihkan Catatan">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
 
           <!-- Keypad Numpad Default (4x4 Grid) -->
           <div class="grid grid-cols-4 gap-1.5 select-none pt-0.5">
@@ -1467,13 +1474,13 @@
 
   <!-- JavaScript Modules (Force cache refresh) -->
   <script src="js/supabase.min.js"></script>
-  <script src="js/supabase-client.js?v=4.0"></script>
-  <script src="js/storage.js?v=4.0"></script>
-  <script src="js/sync.js?v=4.0"></script>
-  <script src="js/storeSessions.js?v=4.0"></script>
-  <script src="js/transactions.js?v=4.0"></script>
-  <script src="js/debts.js?v=4.0"></script>
-  <script src="js/reports.js?v=4.0"></script>
-  <script src="js/app.js?v=4.0"></script>
+  <script src="js/supabase-client.js?v=4.1"></script>
+  <script src="js/storage.js?v=4.1"></script>
+  <script src="js/sync.js?v=4.1"></script>
+  <script src="js/storeSessions.js?v=4.1"></script>
+  <script src="js/transactions.js?v=4.1"></script>
+  <script src="js/debts.js?v=4.1"></script>
+  <script src="js/reports.js?v=4.1"></script>
+  <script src="js/app.js?v=4.1"></script>
 </body>
 </html>
