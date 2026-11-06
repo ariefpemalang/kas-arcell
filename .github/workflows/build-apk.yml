@@ -30,13 +30,9 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK Platform 36
+      - name: Accept Android SDK Licenses
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-36" "build-tools;35.0.0" "platform-tools"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Install Dependencies
         run: npm install
@@ -53,7 +49,7 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --warning-mode all
+          ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
         run: |
@@ -87,6 +83,7 @@ jobs:
             ### 📋 Info
             - **Package:** `com.kasarcell.app`
             - **Min Android:** Android 7.0 (API 24)
+            - **Target Android:** Android 15 (API 35)
             - **Build:** Debug
           files: android/app/build/outputs/apk/debug/BUKU-ARcell.apk
         env:
