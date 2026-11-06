@@ -152,23 +152,16 @@ const SyncManager = {
     }
   },
 
-  // Otomatis kirim perubahan saat user mencatat data baru (senyap tanpa pop-up)
+  // SINKRONISASI HANYA BERJALAN SAAT REFRESH & SAAT PINDAH MENU
+  // (Dinonaktifkan sinkronisasi saat mengetik/input biasa agar tidak mengganggu)
   triggerAutoSync() {
-    const cfg = this.getConfig();
-    if (!cfg.enabled || !cfg.autoSyncOnChange || !this.isOnline()) {
-      return;
-    }
-
-    clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => {
-      this.syncNow(false, true); // Selalu silent (senyap)
-    }, 400);
+    return;
   },
 
   /**
    * Proses Sinkronisasi Utama Dua Arah
    * @param {boolean} manual - jika dipicu manual
-   * @param {boolean} silent - jika true, TIDAK AKAN ADA POPUP APAPUN
+   * @param {boolean} silent - selalu senyap tanpa pop-up
    */
   async syncNow(manual = false, silent = true) {
     if (this.isSyncing || !this.isOnline()) {
@@ -217,9 +210,13 @@ const SyncManager = {
       const now = new Date().toISOString();
       this.saveConfig({ lastSyncTime: now });
 
-      // Refresh tampilan aktif (Dashboard, Transaksi, Hutang) secara mulus
-      if (typeof App !== 'undefined' && App.renderActiveView) {
-        App.renderActiveView();
+      // Refresh tampilan aktif secara senyap tanpa notifikasi/pop-up
+      if (typeof App !== 'undefined' && App.currentView) {
+        if (App.currentView === 'dashboard') App.refreshDashboard();
+        else if (App.currentView === 'transactions') Transactions.renderTable();
+        else if (App.currentView === 'debts') { Debts.renderReceivablesTable(); Debts.renderDebtsTable(); }
+        else if (App.currentView === 'storeSessions') { StoreSessions.renderSessionState(); StoreSessions.renderTableAndStats(); }
+        else if (App.currentView === 'reports') Reports.updateReport();
       }
     } catch (err) {
       console.warn('[Sync]', err.message);

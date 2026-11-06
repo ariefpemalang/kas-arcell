@@ -296,6 +296,13 @@ const App = {
 
   // Toast Notification
   showToast(message, type = 'info') {
+    if (!message) return;
+    // Blokir semua notifikasi pop-up terkait sinkronisasi cloud agar tidak mengganggu
+    const msgLower = String(message).toLowerCase();
+    if (msgLower.includes('sinkron') || msgLower.includes('sync')) {
+      return;
+    }
+
     const container = document.getElementById('toast-container');
     if (!container) return;
 
