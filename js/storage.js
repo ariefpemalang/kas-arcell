@@ -278,6 +278,9 @@ const Storage = {
   saveSettings(settings) {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushSettings) {
+      SupabaseClient.pushSettings(settings);
+    }
   },
 
   // Categories Deleted List (Blacklist)
@@ -304,20 +307,17 @@ const Storage = {
   // Categories
   getCategories(type = 'in') {
     const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
-    const deleted = this.getDeletedCategories();
     try {
-      const raw = JSON.parse(localStorage.getItem(key)) || (type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT);
-      return raw.filter(c => !deleted.includes(c));
+      const raw = JSON.parse(localStorage.getItem(key));
+      if (Array.isArray(raw) && raw.length > 0) return raw;
+      return type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT;
     } catch {
-      const def = type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT;
-      return def.filter(c => !deleted.includes(c));
+      return type === 'in' ? DEFAULT_CATEGORIES_IN : DEFAULT_CATEGORIES_OUT;
     }
   },
   saveCategories(type, list) {
     const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
-    const deleted = this.getDeletedCategories();
-    const cleanList = (list || []).filter(c => !deleted.includes(c));
-    localStorage.setItem(key, JSON.stringify(cleanList));
+    localStorage.setItem(key, JSON.stringify(list || []));
     this._notifyChange();
   },
 
@@ -337,6 +337,9 @@ const Storage = {
     list.unshift(trx);
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushTransaction) {
+      SupabaseClient.pushTransaction(trx);
+    }
     return trx;
   },
   updateTransaction(id, updatedData) {
@@ -346,6 +349,9 @@ const Storage = {
       list[index] = { ...list[index], ...updatedData };
       localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
       this._notifyChange();
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushTransaction) {
+        SupabaseClient.pushTransaction(list[index]);
+      }
       return list[index];
     }
     return null;
@@ -355,6 +361,9 @@ const Storage = {
     list = list.filter(t => t.id !== id);
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.deleteTransaction) {
+      SupabaseClient.deleteTransaction(id);
+    }
     return true;
   },
 

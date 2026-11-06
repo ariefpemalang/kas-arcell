@@ -443,7 +443,6 @@ const App = {
     const val = input ? input.value.trim() : '';
     if (!val) return;
 
-    Storage.unmarkDeletedCategory(val);
     const list = Storage.getCategories(type);
     if (list.includes(val)) {
       this.showToast('Kategori sudah ada!', 'warning');
@@ -452,25 +451,24 @@ const App = {
 
     list.push(val);
     Storage.saveCategories(type, list);
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushCategoryAdd) {
+      SupabaseClient.pushCategoryAdd(val, type);
+    }
     if (input) input.value = '';
     this.renderCategoryChips(type);
     Transactions.renderCategoryOptions(val);
-    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
-      SyncManager.syncNow(false, true);
-    }
     this.showToast('Kategori berhasil ditambahkan!', 'success');
   },
 
   deleteCategory(type, cat) {
-    Storage.recordDeletedCategory(cat);
     let list = Storage.getCategories(type);
     list = list.filter(c => c !== cat);
     Storage.saveCategories(type, list);
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushCategoryDelete) {
+      SupabaseClient.pushCategoryDelete(cat, type);
+    }
     this.renderCategoryChips(type);
     Transactions.renderCategoryOptions();
-    if (typeof SyncManager !== 'undefined' && SyncManager.syncNow) {
-      SyncManager.syncNow(false, true);
-    }
     this.showToast(`Kategori "${cat}" berhasil dihapus.`, 'info');
   },
 
@@ -508,5 +506,9 @@ const App = {
 
 // Start application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  localStorage.removeItem('arcell_deleted_categories');
   App.init();
+  if (typeof SupabaseClient !== 'undefined' && SupabaseClient.init) {
+    SupabaseClient.init();
+  }
 });
