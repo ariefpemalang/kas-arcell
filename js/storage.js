@@ -264,6 +264,12 @@ const Storage = {
     }
   },
 
+  _notifyChange() {
+    if (typeof SyncManager !== 'undefined' && SyncManager.triggerAutoSync) {
+      SyncManager.triggerAutoSync();
+    }
+  },
+
   // Settings
   getSettings() {
     try {
@@ -279,6 +285,7 @@ const Storage = {
   },
   saveSettings(settings) {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    this._notifyChange();
   },
 
   // Categories
@@ -293,6 +300,7 @@ const Storage = {
   saveCategories(type, list) {
     const key = type === 'in' ? STORAGE_KEYS.CATEGORIES_IN : STORAGE_KEYS.CATEGORIES_OUT;
     localStorage.setItem(key, JSON.stringify(list));
+    this._notifyChange();
   },
 
   // Transactions (Kas Masuk & Kas Keluar)
@@ -310,6 +318,7 @@ const Storage = {
     trx.createdAt = new Date().toISOString();
     list.unshift(trx);
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
+    this._notifyChange();
     return trx;
   },
   updateTransaction(id, updatedData) {
@@ -318,6 +327,7 @@ const Storage = {
     if (index !== -1) {
       list[index] = { ...list[index], ...updatedData };
       localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
+      this._notifyChange();
       return list[index];
     }
     return null;
@@ -326,6 +336,7 @@ const Storage = {
     let list = this.getTransactions();
     list = list.filter(t => t.id !== id);
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(list));
+    this._notifyChange();
     return true;
   },
 
@@ -364,6 +375,7 @@ const Storage = {
 
     list.unshift(item);
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
+    this._notifyChange();
     return item;
   },
   updateReceivable(id, updatedData, deductFromCash = true, paymentMethod = 'Tunai') {
@@ -405,6 +417,7 @@ const Storage = {
       list[index].paymentMethod = paymentMethod;
 
       localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
+      this._notifyChange();
       return list[index];
     }
     return null;
@@ -418,6 +431,7 @@ const Storage = {
     }
     list = list.filter(r => r.id !== id);
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
+    this._notifyChange();
     return true;
   },
   addReceivablePayment(id, paymentAmount, paymentNote = 'Cicilan Piutang', recordToCash = true) {
@@ -441,6 +455,7 @@ const Storage = {
     });
 
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
+    this._notifyChange();
 
     // Otomatis masukkan ke Kas Masuk jika recordToCash = true
     if (recordToCash) {
@@ -475,6 +490,7 @@ const Storage = {
     item.createdAt = new Date().toISOString();
     list.unshift(item);
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
+    this._notifyChange();
     return item;
   },
   updateDebt(id, updatedData) {
@@ -484,6 +500,7 @@ const Storage = {
       list[index] = { ...list[index], ...updatedData };
       list[index].status = list[index].paidAmount >= list[index].amount ? 'paid' : (list[index].paidAmount > 0 ? 'partial' : 'unpaid');
       localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
+      this._notifyChange();
       return list[index];
     }
     return null;
@@ -492,6 +509,7 @@ const Storage = {
     let list = this.getDebts();
     list = list.filter(d => d.id !== id);
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
+    this._notifyChange();
     return true;
   },
   addDebtPayment(id, paymentAmount, paymentNote = 'Bayar Hutang', recordToCash = true) {
@@ -515,6 +533,7 @@ const Storage = {
     });
 
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
+    this._notifyChange();
 
     // Otomatis masukkan ke Kas Keluar jika recordToCash = true
     if (recordToCash) {
@@ -541,6 +560,7 @@ const Storage = {
   },
   saveDailySessions(sessions) {
     localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify(sessions));
+    this._notifyChange();
   },
   getActiveSession() {
     try {
@@ -560,6 +580,7 @@ const Storage = {
       startedAt: new Date().toISOString()
     };
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
+    this._notifyChange();
     return session;
   },
   addSessionExpense(item) {
@@ -569,6 +590,7 @@ const Storage = {
     session.pengeluaranList.push(item);
     session.pengeluaran = session.pengeluaranList.reduce((sum, i) => sum + Number(i.nominal || 0), 0);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
+    this._notifyChange();
     return session;
   },
   removeSessionExpense(index) {
@@ -577,10 +599,12 @@ const Storage = {
     session.pengeluaranList.splice(index, 1);
     session.pengeluaran = session.pengeluaranList.reduce((sum, i) => sum + Number(i.nominal || 0), 0);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
+    this._notifyChange();
     return session;
   },
   cancelActiveSession() {
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_SESSION);
+    this._notifyChange();
   },
   finishSession({ saldoAkhir, catatan, jamTutup }) {
     const session = this.getActiveSession();
