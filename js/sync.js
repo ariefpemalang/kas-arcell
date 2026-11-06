@@ -65,10 +65,10 @@ const SyncManager = {
   },
 
   bindEvents() {
-    // Tombol sinkronisasi manual di settings (senyap)
+    // Tombol sinkronisasi manual di settings (senyap tanpa pop-up)
     const btnSyncNow = document.getElementById('btn-sync-cloud-now');
     if (btnSyncNow) {
-      btnSyncNow.addEventListener('click', () => this.syncNow(true, false));
+      btnSyncNow.addEventListener('click', () => this.syncNow(false, true));
     }
 
     // Tombol tes koneksi server di settings (satu-satunya yang menampilkan notifikasi tes)
@@ -221,16 +221,8 @@ const SyncManager = {
       if (typeof App !== 'undefined' && App.renderActiveView) {
         App.renderActiveView();
       }
-
-      // HANYA jika manual dan silent bernilai false (misal klik tombol di setting), tampilkan toast singkat
-      if (manual && !silent && typeof App !== 'undefined' && App.showToast) {
-        App.showToast('Database tersinkronkan', 'success');
-      }
     } catch (err) {
       console.warn('[Sync]', err.message);
-      if (manual && !silent && typeof App !== 'undefined' && App.showToast) {
-        App.showToast(`Sinkronisasi tertunda: ${err.message}`, 'error');
-      }
     } finally {
       this.isSyncing = false;
       this.setSyncingState(false);
