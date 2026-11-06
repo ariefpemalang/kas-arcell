@@ -11,6 +11,7 @@ const Transactions = {
     endDate: ''
   },
   editingId: null,
+  currentCalc: '0',
 
   init() {
     this.renderCategoryOptions();
@@ -24,7 +25,7 @@ const Transactions = {
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        this.saveTransaction();
+        this.submitKeypad();
       });
     }
 
@@ -35,6 +36,14 @@ const Transactions = {
         this.renderCategoryOptions();
       });
     });
+
+    // Date input change listener
+    const dateInput = document.getElementById('trx-date');
+    if (dateInput) {
+      dateInput.addEventListener('change', () => {
+        this.updateDateLabel();
+      });
+    }
 
     // Search & Filter listeners
     const searchInput = document.getElementById('trx-search');
@@ -82,7 +91,7 @@ const Transactions = {
     if (c.includes('servis') || c.includes('tempered') || c.includes('lcd')) return '<i class="fa-solid fa-screwdriver-wrench"></i>';
     if (c.includes('wallet') || c.includes('dana') || c.includes('ovo') || c.includes('gopay')) return '<i class="fa-solid fa-wallet"></i>';
     if (c.includes('pln') || c.includes('token') || c.includes('ppob')) return '<i class="fa-solid fa-bolt"></i>';
-    if (c.includes('piutang') || c.includes('pinjam')) return '<i class="fa-solid fa-hand-holding-dollar"></i>';
+    if (c.includes('piutang') || c.includes('pinjam') || c.includes('bon')) return '<i class="fa-solid fa-hand-holding-dollar"></i>';
     if (c.includes('kulakan') || c.includes('deposit')) return '<i class="fa-solid fa-money-bill-transfer"></i>';
     if (c.includes('operasional') || c.includes('listrik') || c.includes('wifi') || c.includes('air')) return '<i class="fa-solid fa-lightbulb"></i>';
     if (c.includes('sewa') || c.includes('ruko')) return '<i class="fa-solid fa-shop"></i>';
@@ -92,11 +101,34 @@ const Transactions = {
     return '<i class="fa-solid fa-tag"></i>';
   },
 
+  getShortCategoryName(cat) {
+    const map = {
+      'Penjualan Pulsa & Paket Data': 'Pulsa & Data',
+      'Penjualan Voucher Fisik & Perdana': 'Voucher & SIM',
+      'Aksesoris HP (Case, Kabel, Charger)': 'Aksesoris HP',
+      'Jasa Servis & Pasang Tempered Glass': 'Servis HP',
+      'Top Up E-Wallet (Dana, Ovo, Gopay)': 'E-Wallet',
+      'Token PLN & Pembayaran PPOB': 'Token & PPOB',
+      'Pelunasan Piutang Pelanggan': 'Pelunasan',
+      'Pemasukan Lainnya': 'Lainnya',
+      'Kulakan / Deposit Saldo Agen Pulsa': 'Deposit Pulsa',
+      'Kulakan Aksesoris & Sparepart HP': 'Sparepart',
+      'Belanja Stok Voucher & Kartu Perdana': 'Stok Voucher',
+      'Pemberian Piutang / Pinjaman': 'Pinjaman/Bon',
+      'Biaya Operasional (Listrik, Wifi, Air)': 'Operasional',
+      'Sewa Tempat / Ruko': 'Sewa Ruko',
+      'Gaji Karyawan / Uang Makan': 'Gaji & Makan',
+      'Pembayaran Cicilan Hutang': 'Bayar Hutang',
+      'Keperluan Pribadi / Prive': 'Pribadi/Prive',
+      'Pengeluaran Lainnya': 'Lainnya'
+    };
+    return map[cat] || cat;
+  },
+
   renderCategoryOptions(selectedCat = null) {
-    const selectedType = document.querySelector('input[name="trx-type"]:checked')?.value || 'in';
+    const selectedType = document.querySelector('input[name="trx-type"]:checked')?.value || 'out';
     const categories = Storage.getCategories(selectedType);
     const categoryInput = document.getElementById('trx-category');
-    const categoryLabel = document.getElementById('trx-category-label');
     const buttonsContainer = document.getElementById('trx-category-buttons');
     const filterSelect = document.getElementById('trx-filter-category');
 
@@ -109,42 +141,35 @@ const Transactions = {
       categoryInput.value = activeCategory;
     }
 
-    if (categoryLabel) {
-      categoryLabel.textContent = activeCategory;
-      categoryLabel.className = selectedType === 'in' 
-        ? 'text-[11px] font-bold text-emerald-600 truncate max-w-[200px]'
-        : 'text-[11px] font-bold text-rose-600 truncate max-w-[200px]';
-    }
-
-    // Render Tombol-Tombol Kategori
+    // Render Grid Ikon Kategori Bulat (4 Kolom persis seperti gambar)
     if (buttonsContainer) {
       buttonsContainer.innerHTML = '';
       categories.forEach(cat => {
         const isSelected = cat === activeCategory;
-        const btn = document.createElement('button');
-        btn.type = 'button';
+        const col = document.createElement('div');
+        col.className = 'flex flex-col items-center cursor-pointer group select-none';
 
+        const circle = document.createElement('div');
         if (isSelected) {
-          btn.className = selectedType === 'in'
-            ? 'p-2.5 rounded-xl text-xs font-bold text-left transition flex items-center gap-2 border bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-500/30'
-            : 'p-2.5 rounded-xl text-xs font-bold text-left transition flex items-center gap-2 border bg-rose-600 text-white border-rose-600 shadow-sm shadow-rose-600/30 ring-2 ring-rose-500/30';
+          circle.className = 'w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-amber-400 text-black flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-amber-400/30 scale-105 transition-all';
         } else {
-          btn.className = 'p-2.5 rounded-xl text-xs font-medium text-left transition flex items-center gap-2 border bg-white text-slate-700 border-slate-200/90 hover:border-slate-300 hover:bg-slate-100/70 active:scale-98';
+          circle.className = 'w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[#27272a] text-zinc-300 border border-zinc-700/60 flex items-center justify-center text-base sm:text-lg hover:border-zinc-500 hover:text-white transition-all';
         }
 
-        const iconHtml = this.getCategoryIcon(cat);
-        btn.innerHTML = `
-          <span class="shrink-0 w-6 h-6 rounded-lg ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center text-[11px]">
-            ${iconHtml}
-          </span>
-          <span class="truncate font-semibold">${cat}</span>
-        `;
+        circle.innerHTML = this.getCategoryIcon(cat);
 
-        btn.addEventListener('click', () => {
+        const label = document.createElement('span');
+        label.className = `text-[11px] font-medium text-center mt-1.5 px-0.5 line-clamp-2 leading-tight transition ${isSelected ? 'text-amber-400 font-bold' : 'text-zinc-400 group-hover:text-zinc-200'}`;
+        label.textContent = this.getShortCategoryName(cat);
+
+        col.appendChild(circle);
+        col.appendChild(label);
+
+        col.addEventListener('click', () => {
           this.renderCategoryOptions(cat);
         });
 
-        buttonsContainer.appendChild(btn);
+        buttonsContainer.appendChild(col);
       });
     }
 
@@ -163,36 +188,172 @@ const Transactions = {
     }
   },
 
+  switchType(type) {
+    const radioIn = document.getElementById('trx-type-in');
+    const radioOut = document.getElementById('trx-type-out');
+    const tabIn = document.getElementById('tab-trx-in');
+    const tabOut = document.getElementById('tab-trx-out');
+
+    if (type === 'in') {
+      if (radioIn) radioIn.checked = true;
+      if (radioOut) radioOut.checked = false;
+      if (tabIn) {
+        tabIn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-black shadow-sm';
+      }
+      if (tabOut) {
+        tabOut.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-zinc-400 hover:text-white';
+      }
+    } else {
+      if (radioOut) radioOut.checked = true;
+      if (radioIn) radioIn.checked = false;
+      if (tabOut) {
+        tabOut.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-black shadow-sm';
+      }
+      if (tabIn) {
+        tabIn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-zinc-400 hover:text-white';
+      }
+    }
+    this.renderCategoryOptions();
+  },
+
+  // Logika Keypad Numpad
+  pressKey(val) {
+    if (this.currentCalc === '0') {
+      this.currentCalc = val;
+    } else {
+      this.currentCalc += val;
+    }
+    this.updateKeypadDisplay();
+  },
+
+  pressOp(op) {
+    if (!this.currentCalc || this.currentCalc === '0') return;
+    const lastChar = this.currentCalc.slice(-1);
+    if (['+', '-'].includes(lastChar)) {
+      this.currentCalc = this.currentCalc.slice(0, -1) + op;
+    } else {
+      this.currentCalc += op;
+    }
+    this.updateKeypadDisplay();
+  },
+
+  backspace() {
+    if (this.currentCalc.length > 0) {
+      this.currentCalc = this.currentCalc.slice(0, -1);
+    }
+    if (!this.currentCalc) {
+      this.currentCalc = '0';
+    }
+    this.updateKeypadDisplay();
+  },
+
+  resetKeypad() {
+    this.currentCalc = '0';
+    this.updateKeypadDisplay();
+  },
+
+  updateKeypadDisplay() {
+    const dispAmount = document.getElementById('trx-display-amount');
+    const dispCalc = document.getElementById('trx-display-calc');
+    const hiddenAmount = document.getElementById('trx-amount');
+
+    let evalVal = 0;
+    try {
+      const cleanExpr = this.currentCalc.replace(/[^0-9+-]/g, '');
+      if (cleanExpr) {
+        evalVal = Function('"use strict";return (' + cleanExpr + ')')() || 0;
+      }
+    } catch (e) {
+      evalVal = 0;
+    }
+
+    if (evalVal < 0) evalVal = 0;
+
+    if (hiddenAmount) {
+      hiddenAmount.value = evalVal;
+    }
+
+    if (dispAmount) {
+      if (this.currentCalc.includes('+') || (this.currentCalc.includes('-') && this.currentCalc !== '0')) {
+        dispAmount.textContent = App.formatNumberOnly(evalVal);
+        if (dispCalc) {
+          dispCalc.textContent = this.currentCalc;
+          dispCalc.classList.remove('hidden');
+        }
+      } else {
+        const num = Number(this.currentCalc) || 0;
+        dispAmount.textContent = num > 0 ? App.formatNumberOnly(num) : '0';
+        if (dispCalc) dispCalc.classList.add('hidden');
+      }
+    }
+  },
+
+  openDatePicker() {
+    const dateInput = document.getElementById('trx-date');
+    if (dateInput) {
+      if (typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+      } else {
+        dateInput.focus();
+        dateInput.click();
+      }
+    }
+  },
+
+  updateDateLabel() {
+    const dateInput = document.getElementById('trx-date');
+    const label = document.getElementById('label-trx-date');
+    if (!dateInput || !label) return;
+    const today = getFormattedDate(0);
+    if (dateInput.value === today) {
+      label.textContent = 'Hari ini';
+    } else if (dateInput.value) {
+      const parts = dateInput.value.split('-');
+      label.textContent = `${parts[2]}/${parts[1]}`;
+    }
+  },
+
+  submitKeypad() {
+    if (this.currentCalc.includes('+') || this.currentCalc.includes('-')) {
+      try {
+        const cleanExpr = this.currentCalc.replace(/[^0-9+-]/g, '');
+        const evalVal = Function('"use strict";return (' + cleanExpr + ')')() || 0;
+        this.currentCalc = String(Math.max(0, evalVal));
+        this.updateKeypadDisplay();
+      } catch (e) {}
+    }
+    this.saveTransaction();
+  },
+
   openModal(trx = null) {
     const modal = document.getElementById('transaction-modal');
     const modalTitle = document.getElementById('trx-modal-title');
     const form = document.getElementById('transaction-form');
-    form.reset();
+    if (form) form.reset();
 
     if (trx) {
       this.editingId = trx.id;
-      modalTitle.textContent = 'Edit Transaksi';
-      const radio = document.querySelector(`input[name="trx-type"][value="${trx.type}"]`);
-      if (radio) radio.checked = true;
+      if (modalTitle) modalTitle.textContent = 'Edit Transaksi';
+      this.currentCalc = String(trx.amount || '0');
+      this.switchType(trx.type);
       this.renderCategoryOptions(trx.category);
       document.getElementById('trx-date').value = trx.date;
-      document.getElementById('trx-amount').value = App.formatNumberOnly(trx.amount);
-      document.getElementById('trx-payment').value = trx.paymentMethod || 'Tunai';
       document.getElementById('trx-notes').value = trx.notes || '';
     } else {
       this.editingId = null;
-      modalTitle.textContent = 'Tambah Transaksi Baru';
-      document.querySelector('input[name="trx-type"][value="in"]').checked = true;
+      if (modalTitle) modalTitle.textContent = 'Tambahkan';
+      this.currentCalc = '0';
+      this.switchType('out'); // Default Pengeluaran seperti di gambar
       this.renderCategoryOptions();
       document.getElementById('trx-date').value = getFormattedDate(0);
-      document.getElementById('trx-amount').value = '';
-      document.getElementById('trx-payment').value = 'Tunai';
       document.getElementById('trx-notes').value = '';
     }
 
+    this.updateKeypadDisplay();
+    this.updateDateLabel();
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    setTimeout(() => document.getElementById('trx-amount').focus(), 100);
   },
 
   closeModal() {
@@ -200,11 +361,13 @@ const Transactions = {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     this.editingId = null;
+    this.currentCalc = '0';
   },
 
   saveTransaction() {
-    const type = document.querySelector('input[name="trx-type"]:checked').value;
-    const date = document.getElementById('trx-date').value;
+    const typeRadio = document.querySelector('input[name="trx-type"]:checked');
+    const type = typeRadio ? typeRadio.value : 'out';
+    const date = document.getElementById('trx-date').value || getFormattedDate(0);
     const category = document.getElementById('trx-category').value;
     const rawAmount = document.getElementById('trx-amount').value.replace(/[^0-9]/g, '');
     const amount = Number(rawAmount);
