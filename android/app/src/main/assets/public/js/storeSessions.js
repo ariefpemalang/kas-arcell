@@ -10,6 +10,27 @@ const StoreSessions = {
     this.renderTableAndStats();
   },
 
+  getSessionSortTime(s) {
+    if (!s) return 0;
+    if (s.completedAt) {
+      const t = new Date(s.completedAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (s.createdAt) {
+      const t = new Date(s.createdAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (s.id && typeof s.id === 'string' && s.id.startsWith('ses-')) {
+      const n = parseInt(s.id.replace('ses-', ''), 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+    if (s.tanggal) {
+      const t = new Date(s.tanggal).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    return 0;
+  },
+
   bindEvents() {
     // Form Buka Toko
     const formBuka = document.getElementById('form-buka-toko');
@@ -156,8 +177,8 @@ const StoreSessions = {
       const inputSaldoAwal = document.getElementById('input-saldo-awal-sesi');
 
       if (sessions.length > 0) {
-        // Urutkan berdasarkan tanggal terbaru menurun
-        const sorted = [...sessions].sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+        // Urutkan berdasarkan waktu sesi terbaru menurun
+        const sorted = [...sessions].sort((a, b) => this.getSessionSortTime(b) - this.getSessionSortTime(a));
         const lastSession = sorted[0];
         const saldoAkhirKemarin = Number(lastSession.saldoAkhir || 0);
 
@@ -358,7 +379,8 @@ const StoreSessions = {
     const totalKeuntungan = sessions.reduce((s, r) => s + Number(r.keuntungan || 0), 0);
     const totalPengeluaran = sessions.reduce((s, r) => s + Number(r.pengeluaran || 0), 0);
     const rataKeuntungan = sessions.length > 0 ? Math.round(totalKeuntungan / sessions.length) : 0;
-    const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+    const sorted = [...sessions].sort((a, b) => this.getSessionSortTime(b) - this.getSessionSortTime(a));
+    const lastSession = sorted.length > 0 ? sorted[0] : null;
 
     const statKeuntungan = document.getElementById('stat-total-keuntungan-sesi');
     const statPengeluaran = document.getElementById('stat-total-pengeluaran-sesi');
@@ -385,7 +407,7 @@ const StoreSessions = {
     if (emptyState) emptyState.classList.add('hidden');
 
     // Tampilkan urutan terbaru di atas
-    [...sessions].reverse().forEach(item => {
+    sorted.forEach(item => {
       const tr = document.createElement('tr');
       tr.className = 'hover:bg-slate-50 transition border-b border-slate-100 text-xs sm:text-sm';
 
@@ -437,8 +459,9 @@ const StoreSessions = {
       return;
     }
 
+    const sorted = [...sessions].sort((a, b) => this.getSessionSortTime(b) - this.getSessionSortTime(a));
     const wb = XLSX.utils.book_new();
-    const data = sessions.map(s => ({
+    const data = sorted.map(s => ({
       'Tanggal': s.tanggal,
       'Jam Buka': s.jamBuka || '-',
       'Jam Tutup': s.jamTutup || '-',

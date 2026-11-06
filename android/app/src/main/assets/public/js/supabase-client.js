@@ -150,7 +150,7 @@ const SupabaseClient = {
       }
 
       // 5. Daily Sessions
-      const { data: sessions, error: errSess } = await this.client.from('daily_sessions').select('*').order('tanggal', { ascending: true });
+      const { data: sessions, error: errSess } = await this.client.from('daily_sessions').select('*');
       if (!errSess && Array.isArray(sessions)) {
         const mappedSessions = sessions.map(s => ({
           id: s.id,
@@ -162,7 +162,8 @@ const SupabaseClient = {
           pengeluaran: parseFloat(s.pengeluaran || 0),
           pengeluaranList: s.pengeluaran_list || [],
           keuntungan: parseFloat(s.keuntungan || 0),
-          catatan: s.catatan || ''
+          catatan: s.catatan || '',
+          createdAt: s.created_at
         }));
         localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify(mappedSessions));
       }
@@ -360,7 +361,8 @@ const SupabaseClient = {
         pengeluaran: parseFloat(newRow.pengeluaran || 0),
         pengeluaranList: newRow.pengeluaran_list || [],
         keuntungan: parseFloat(newRow.keuntungan || 0),
-        catatan: newRow.catatan || ''
+        catatan: newRow.catatan || '',
+        createdAt: newRow.created_at
       };
       const idx = list.findIndex(s => s.id === mapped.id);
       if (idx >= 0) list[idx] = mapped;
@@ -512,10 +514,28 @@ const SupabaseClient = {
         pengeluaran: session.pengeluaran || 0,
         pengeluaran_list: session.pengeluaranList || [],
         keuntungan: session.keuntungan || 0,
-        catatan: session.catatan || ''
+        catatan: session.catatan || '',
+        created_at: session.completedAt || session.createdAt || new Date().toISOString()
       };
       await this.client.from('daily_sessions').upsert(row);
+      console.log('✅ [Supabase] Daily session pushed:', session.id);
     } catch(e) { console.error('[Supabase] pushDailySession failed:', e); }
+  },
+
+  async deleteDailySession(id) {
+    if (!this.client) return;
+    try {
+      await this.client.from('daily_sessions').delete().eq('id', id);
+      console.log('✅ [Supabase] Daily session deleted:', id);
+    } catch(e) { console.error('[Supabase] deleteDailySession failed:', e); }
+  },
+
+  async clearAllDailySessions() {
+    if (!this.client) return;
+    try {
+      await this.client.from('daily_sessions').delete().neq('id', '___none___');
+      console.log('✅ [Supabase] All daily sessions cleared');
+    } catch(e) { console.error('[Supabase] clearAllDailySessions failed:', e); }
   },
 
   async pushActiveSession(sessionData) {

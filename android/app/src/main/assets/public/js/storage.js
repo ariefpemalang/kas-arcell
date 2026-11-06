@@ -231,28 +231,16 @@ const Storage = {
     }
 
     if (!localStorage.getItem(STORAGE_KEYS.TRANSACTIONS)) {
-      const seed = getInitialSeedData();
-      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(seed.transactions));
-      localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(seed.receivables));
-      localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(seed.debts));
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify([]));
     }
-
-    // Migrasi riwayat dari aplikasi PEMBUKUAN TOKO sebelumnya jika ada
-    if (!localStorage.getItem(STORAGE_KEYS.DAILY_SESSIONS)) {
-      const existingToko = localStorage.getItem('pembukuan_toko_records_v2') || localStorage.getItem('pembukuan_toko_records');
-      if (existingToko) {
-        try {
-          const parsed = JSON.parse(existingToko);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify(parsed));
-          }
-        } catch (e) {}
-      }
+    if (!localStorage.getItem(STORAGE_KEYS.RECEIVABLES)) {
+      localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify([]));
     }
-
+    if (!localStorage.getItem(STORAGE_KEYS.DEBTS)) {
+      localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify([]));
+    }
     if (!localStorage.getItem(STORAGE_KEYS.DAILY_SESSIONS)) {
-      const seed = getInitialSeedData();
-      localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify(seed.dailySessions));
+      localStorage.setItem(STORAGE_KEYS.DAILY_SESSIONS, JSON.stringify([]));
     }
   },
 
@@ -543,6 +531,9 @@ const Storage = {
       list[index].status = list[index].paidAmount >= list[index].amount ? 'paid' : (list[index].paidAmount > 0 ? 'partial' : 'unpaid');
       localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
       this._notifyChange();
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushDebt) {
+        SupabaseClient.pushDebt(list[index]);
+      }
       return list[index];
     }
     return null;
@@ -700,14 +691,14 @@ const Storage = {
     let list = this.getDailySessions();
     list = list.filter(s => s.id !== id);
     this.saveDailySessions(list);
-    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.client) {
-      SupabaseClient.client.from('daily_sessions').delete().eq('id', id);
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.deleteDailySession) {
+      SupabaseClient.deleteDailySession(id);
     }
   },
   clearAllDailySessions() {
     this.saveDailySessions([]);
-    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.client) {
-      SupabaseClient.client.from('daily_sessions').delete().neq('id', '___none___');
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.clearAllDailySessions) {
+      SupabaseClient.clearAllDailySessions();
     }
   },
 
