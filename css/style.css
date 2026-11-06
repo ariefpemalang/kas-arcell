@@ -45,13 +45,14 @@ body {
 
 /* Print Styling */
 @media print {
-  body * {
+  body.printing-receipt * {
     visibility: hidden;
   }
-  #receipt-modal-content, #receipt-modal-content * {
+  body.printing-receipt #receipt-modal-content,
+  body.printing-receipt #receipt-modal-content * {
     visibility: visible;
   }
-  #receipt-modal-content {
+  body.printing-receipt #receipt-modal-content {
     position: absolute;
     left: 0;
     top: 0;
@@ -61,6 +62,22 @@ body {
     box-shadow: none;
     border: none;
   }
+
+  body:not(.printing-receipt) .no-print,
+  body:not(.printing-receipt) aside,
+  body:not(.printing-receipt) header,
+  body:not(.printing-receipt) #sidebar-mobile,
+  body:not(.printing-receipt) .btn-quick-sync,
+  body:not(.printing-receipt) #toast-container {
+    display: none !important;
+  }
+
+  body:not(.printing-receipt) main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
   .no-print {
     display: none !important;
   }

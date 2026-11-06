@@ -879,12 +879,130 @@
 
         <!-- Category Doughnut Chart -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col">
-          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Komposisi Pemasukan Terbesar</h4>
+          <div class="flex items-center justify-between mb-4">
+            <h4 id="category-chart-title" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Komposisi Pemasukan Terbesar</h4>
+            <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-[10px] font-bold">
+              <button type="button" id="btn-chart-cat-in" onclick="Reports.setChartCategoryType('in')" class="px-2 py-1 rounded-md bg-white text-slate-800 shadow-2xs font-bold transition">Pemasukan</button>
+              <button type="button" id="btn-chart-cat-out" onclick="Reports.setChartCategoryType('out')" class="px-2 py-1 rounded-md text-slate-500 hover:text-slate-800 transition">Pengeluaran</button>
+            </div>
+          </div>
           <div class="h-48 relative mb-4">
             <canvas id="category-chart"></canvas>
           </div>
           <div id="top-categories-list" class="space-y-3 flex-1 overflow-y-auto">
             <!-- Dynamic categories list -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- LAPORAN RINCIAN & REKAPITULASI KATEGORI                  -->
+      <!-- ======================================================== -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <!-- Header & Toolbar -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/60">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg shadow-2xs">
+              <i class="fa-solid fa-tags"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-slate-900">Laporan Rekapitulasi Kategori</h4>
+                <span id="rep-cat-period-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Bulan Ini</span>
+              </div>
+              <p class="text-xs text-slate-400">Rincian performa kas masuk dan kas keluar berdasarkan pos kategori transaksi</p>
+            </div>
+          </div>
+
+          <!-- Controls: Type Switcher, Category Select & Search -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Filter Type: Semua / Pemasukan / Pengeluaran -->
+            <div class="inline-flex p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
+              <button type="button" id="btn-cat-filter-all" onclick="Reports.setCategoryTypeFilter('all')" class="px-3 py-1.5 rounded-lg transition cat-type-btn bg-white text-slate-800 font-bold shadow-xs">Semua</button>
+              <button type="button" id="btn-cat-filter-in" onclick="Reports.setCategoryTypeFilter('in')" class="px-3 py-1.5 rounded-lg transition cat-type-btn text-slate-600 hover:text-slate-900 font-semibold">Pemasukan</button>
+              <button type="button" id="btn-cat-filter-out" onclick="Reports.setCategoryTypeFilter('out')" class="px-3 py-1.5 rounded-lg transition cat-type-btn text-slate-600 hover:text-slate-900 font-semibold">Pengeluaran</button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="input-search-cat-report" placeholder="Cari kategori..." oninput="Reports.setCategorySearch(this.value)" class="pl-8 pr-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-indigo-500 w-36 sm:w-44">
+            </div>
+
+            <!-- Category Select Filter -->
+            <select id="report-category-select" onchange="Reports.setSelectedCategory(this.value)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-slate-700 focus:outline-none focus:border-indigo-500 max-w-[150px]">
+              <option value="all">Semua Kategori</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3 Mini Summary Indicators -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 border-b border-slate-100 bg-slate-50/30 text-xs divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+          <div class="p-3.5 flex items-center justify-between sm:justify-start sm:gap-3">
+            <span class="text-slate-400 font-medium">Kategori Aktif:</span>
+            <span id="rep-cat-active-count" class="font-bold text-slate-800">0 Kategori</span>
+          </div>
+          <div class="p-3.5 flex items-center justify-between sm:justify-start sm:gap-3">
+            <span class="text-slate-400 font-medium">Pemasukan Terbesar:</span>
+            <span id="rep-cat-top-in" class="font-bold text-emerald-700 truncate max-w-[200px]">-</span>
+          </div>
+          <div class="p-3.5 flex items-center justify-between sm:justify-start sm:gap-3">
+            <span class="text-slate-400 font-medium">Pengeluaran Terbesar:</span>
+            <span id="rep-cat-top-out" class="font-bold text-rose-700 truncate max-w-[200px]">-</span>
+          </div>
+        </div>
+
+        <!-- Category Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3 px-4 w-12 text-center">No</th>
+                <th class="py-3 px-4">Nama Kategori</th>
+                <th class="py-3 px-4">Tipe Kas</th>
+                <th class="py-3 px-4 text-center">Frekuensi</th>
+                <th class="py-3 px-4 text-right">Rata-rata</th>
+                <th class="py-3 px-4 text-right">Total Nominal</th>
+                <th class="py-3 px-4 w-44">Porsi Kontribusi</th>
+                <th class="py-3 px-4 text-center w-24 no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-category-report" class="divide-y divide-slate-100">
+              <!-- Dynamically populated rows -->
+            </tbody>
+            <tfoot id="tfoot-category-report" class="bg-slate-50/90 font-bold border-t border-slate-200">
+              <!-- Dynamically populated totals -->
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Category Drilldown Panel (Rincian Transaksi per Kategori) -->
+        <div id="category-drilldown-panel" class="hidden border-t-2 border-indigo-500 bg-indigo-50/40 p-4 sm:p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              <h5 class="text-xs font-bold text-indigo-950" id="drilldown-title">Rincian Transaksi Kategori</h5>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700" id="drilldown-badge">0 Transaksi</span>
+              <span class="text-xs font-black text-indigo-900 ml-1" id="drilldown-total">Total: Rp 0</span>
+            </div>
+            <button type="button" onclick="Reports.closeDrilldown()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 shadow-2xs transition active:scale-95 self-start sm:self-auto">
+              <i class="fa-solid fa-xmark text-slate-400"></i> Tutup Rincian
+            </button>
+          </div>
+          <div class="overflow-x-auto bg-white rounded-xl border border-indigo-100/90 shadow-2xs">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 border-b border-slate-100">
+                <tr>
+                  <th class="py-2.5 px-3 whitespace-nowrap">Tanggal</th>
+                  <th class="py-2.5 px-3">Catatan / Keterangan</th>
+                  <th class="py-2.5 px-3 text-center whitespace-nowrap">Metode Bayar</th>
+                  <th class="py-2.5 px-3 text-right whitespace-nowrap">Nominal</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-category-drilldown" class="divide-y divide-slate-100">
+                <!-- Drilldown rows -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1474,13 +1592,13 @@
 
   <!-- JavaScript Modules (Force cache refresh) -->
   <script src="js/supabase.min.js"></script>
-  <script src="js/supabase-client.js?v=4.5"></script>
-  <script src="js/storage.js?v=4.5"></script>
-  <script src="js/sync.js?v=4.5"></script>
-  <script src="js/storeSessions.js?v=4.5"></script>
-  <script src="js/transactions.js?v=4.5"></script>
-  <script src="js/debts.js?v=4.5"></script>
-  <script src="js/reports.js?v=4.5"></script>
-  <script src="js/app.js?v=4.5"></script>
+  <script src="js/supabase-client.js?v=4.6"></script>
+  <script src="js/storage.js?v=4.6"></script>
+  <script src="js/sync.js?v=4.6"></script>
+  <script src="js/storeSessions.js?v=4.6"></script>
+  <script src="js/transactions.js?v=4.6"></script>
+  <script src="js/debts.js?v=4.6"></script>
+  <script src="js/reports.js?v=4.6"></script>
+  <script src="js/app.js?v=4.6"></script>
 </body>
 </html>
