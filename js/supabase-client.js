@@ -169,8 +169,12 @@ const SupabaseClient = {
 
       // 6. Active Session
       const { data: active, error: errAct } = await this.client.from('active_session').select('*').eq('id', 'current').maybeSingle();
-      if (!errAct && active && active.data) {
-        localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(active.data));
+      if (!errAct) {
+        if (active && active.data) {
+          localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(active.data));
+        } else {
+          localStorage.removeItem(STORAGE_KEYS.ACTIVE_SESSION);
+        }
       }
 
       // 7. Settings

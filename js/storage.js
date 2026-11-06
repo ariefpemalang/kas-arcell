@@ -403,6 +403,9 @@ const Storage = {
     list.unshift(item);
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushReceivable) {
+      SupabaseClient.pushReceivable(item);
+    }
     return item;
   },
   updateReceivable(id, updatedData, deductFromCash = true, paymentMethod = 'Tunai') {
@@ -445,6 +448,9 @@ const Storage = {
 
       localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
       this._notifyChange();
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushReceivable) {
+        SupabaseClient.pushReceivable(list[index]);
+      }
       return list[index];
     }
     return null;
@@ -459,6 +465,9 @@ const Storage = {
     list = list.filter(r => r.id !== id);
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.deleteReceivable) {
+      SupabaseClient.deleteReceivable(id);
+    }
     return true;
   },
   addReceivablePayment(id, paymentAmount, paymentNote = 'Cicilan Piutang', recordToCash = true) {
@@ -483,6 +492,9 @@ const Storage = {
 
     localStorage.setItem(STORAGE_KEYS.RECEIVABLES, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushReceivable) {
+      SupabaseClient.pushReceivable(item);
+    }
 
     // Otomatis masukkan ke Kas Masuk jika recordToCash = true
     if (recordToCash) {
@@ -518,6 +530,9 @@ const Storage = {
     list.unshift(item);
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushDebt) {
+      SupabaseClient.pushDebt(item);
+    }
     return item;
   },
   updateDebt(id, updatedData) {
@@ -537,6 +552,9 @@ const Storage = {
     list = list.filter(d => d.id !== id);
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.deleteDebt) {
+      SupabaseClient.deleteDebt(id);
+    }
     return true;
   },
   addDebtPayment(id, paymentAmount, paymentNote = 'Bayar Hutang', recordToCash = true) {
@@ -561,6 +579,9 @@ const Storage = {
 
     localStorage.setItem(STORAGE_KEYS.DEBTS, JSON.stringify(list));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushDebt) {
+      SupabaseClient.pushDebt(item);
+    }
 
     // Otomatis masukkan ke Kas Keluar jika recordToCash = true
     if (recordToCash) {
@@ -608,6 +629,9 @@ const Storage = {
     };
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushActiveSession) {
+      SupabaseClient.pushActiveSession(session);
+    }
     return session;
   },
   addSessionExpense(item) {
@@ -618,6 +642,9 @@ const Storage = {
     session.pengeluaran = session.pengeluaranList.reduce((sum, i) => sum + Number(i.nominal || 0), 0);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushActiveSession) {
+      SupabaseClient.pushActiveSession(session);
+    }
     return session;
   },
   removeSessionExpense(index) {
@@ -627,11 +654,17 @@ const Storage = {
     session.pengeluaran = session.pengeluaranList.reduce((sum, i) => sum + Number(i.nominal || 0), 0);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushActiveSession) {
+      SupabaseClient.pushActiveSession(session);
+    }
     return session;
   },
   cancelActiveSession() {
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_SESSION);
     this._notifyChange();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushActiveSession) {
+      SupabaseClient.pushActiveSession(null);
+    }
   },
   finishSession({ saldoAkhir, catatan, jamTutup }) {
     const session = this.getActiveSession();
@@ -658,15 +691,24 @@ const Storage = {
     list.push(record);
     this.saveDailySessions(list);
     this.cancelActiveSession();
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushDailySession) {
+      SupabaseClient.pushDailySession(record);
+    }
     return record;
   },
   deleteDailySession(id) {
     let list = this.getDailySessions();
     list = list.filter(s => s.id !== id);
     this.saveDailySessions(list);
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.client) {
+      SupabaseClient.client.from('daily_sessions').delete().eq('id', id);
+    }
   },
   clearAllDailySessions() {
     this.saveDailySessions([]);
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.client) {
+      SupabaseClient.client.from('daily_sessions').delete().neq('id', '___none___');
+    }
   },
 
   // Perhitungan Ringkasan / Summary

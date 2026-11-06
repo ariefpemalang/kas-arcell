@@ -184,21 +184,11 @@ if ($action === 'check' || $action === 'timestamp') {
 
 // ACTION: GET DATA
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $db = readDatabase($dbFile);
-    if (!$db) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Database server masih kosong (menunggu sinkronisasi pertama).',
-            'timestamp' => date('c'),
-            'data' => null
-        ]);
-        exit;
-    }
-
     echo json_encode([
         'success' => true,
-        'timestamp' => $db['updatedAt'] ?? date('c'),
-        'data' => $db
+        'message' => 'Database sekarang menggunakan Supabase Realtime Cloud (PostgreSQL).',
+        'timestamp' => date('c'),
+        'data' => null
     ]);
     exit;
 }
