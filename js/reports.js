@@ -434,9 +434,14 @@ const Reports = {
           </div>
         </td>
         <td class="py-3 px-4 text-center no-print">
-          <button type="button" onclick="Reports.toggleCategoryDrilldown('${item.key}')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition active:scale-95 flex items-center gap-1 mx-auto" title="Lihat Rincian Transaksi">
-            <i class="fa-solid fa-list-ul text-[10px]"></i> Rincian
-          </button>
+          <div class="flex items-center justify-center gap-1.5">
+            <button type="button" onclick="Reports.toggleCategoryDrilldown('${item.key}')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition active:scale-95 flex items-center gap-1" title="Lihat Rincian Transaksi">
+              <i class="fa-solid fa-list-ul text-[10px]"></i> Rincian
+            </button>
+            <button type="button" onclick="App.openEditCategoryModal('${item.type}', '${item.name}')" class="p-1 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-500 hover:text-sky-700 font-bold text-[11px] border border-slate-200 hover:border-sky-200 transition active:scale-95 w-7 h-7 flex items-center justify-center" title="Ubah Nama Kategori">
+              <i class="fa-solid fa-pen text-[10px]"></i>
+            </button>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);

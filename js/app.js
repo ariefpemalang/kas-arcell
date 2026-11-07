@@ -411,17 +411,32 @@ const App = {
     container.innerHTML = '';
     list.forEach(cat => {
       const chip = document.createElement('span');
-      chip.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 shadow-sm';
+      chip.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs bg-white border border-slate-200 text-slate-700 shadow-2xs hover:border-slate-300 transition';
       
       const spanText = document.createElement('span');
+      spanText.className = 'font-semibold';
       spanText.textContent = cat;
       chip.appendChild(spanText);
 
+      // Tombol Edit Kategori
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'text-slate-400 hover:text-sky-600 p-0.5 rounded transition active:scale-90';
+      editBtn.innerHTML = '<i class="fa-solid fa-pen text-[10px]"></i>';
+      editBtn.title = `Ubah nama "${cat}"`;
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openEditCategoryModal(type, cat);
+      });
+      chip.appendChild(editBtn);
+
+      // Tombol Hapus Kategori
       const delBtn = document.createElement('button');
       delBtn.type = 'button';
       delBtn.className = 'text-slate-400 hover:text-rose-500 p-0.5 rounded transition active:scale-90';
       delBtn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>';
-      delBtn.title = `Hapus ${cat}`;
+      delBtn.title = `Hapus "${cat}"`;
       delBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -431,6 +446,84 @@ const App = {
 
       container.appendChild(chip);
     });
+  },
+
+  openEditCategoryModal(type, oldName) {
+    const modal = document.getElementById('edit-category-modal');
+    const input = document.getElementById('input-edit-cat-name');
+    const oldNameInput = document.getElementById('edit-cat-old-name');
+    const typeInput = document.getElementById('edit-cat-type');
+    const subtitle = document.getElementById('edit-cat-subtitle');
+
+    if (oldNameInput) oldNameInput.value = oldName;
+    if (typeInput) typeInput.value = type;
+    if (subtitle) subtitle.textContent = `Kategori ${type === 'in' ? 'Pemasukan' : 'Pengeluaran'}`;
+    if (input) {
+      input.value = oldName;
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 100);
+    }
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  },
+
+  closeEditCategoryModal() {
+    const modal = document.getElementById('edit-category-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  },
+
+  handleSaveEditCategory(e) {
+    if (e) e.preventDefault();
+    const oldName = document.getElementById('edit-cat-old-name')?.value;
+    const type = document.getElementById('edit-cat-type')?.value;
+    const input = document.getElementById('input-edit-cat-name');
+    const newName = input ? input.value.trim() : '';
+
+    if (!newName) {
+      this.showToast('Nama kategori tidak boleh kosong!', 'warning');
+      return;
+    }
+
+    if (newName === oldName) {
+      this.closeEditCategoryModal();
+      return;
+    }
+
+    const list = Storage.getCategories(type);
+    if (list.includes(newName)) {
+      this.showToast(`Kategori "${newName}" sudah ada!`, 'warning');
+      return;
+    }
+
+    // Update in Storage
+    Storage.updateCategory(type, oldName, newName);
+
+    // Sync to Supabase
+    if (typeof SupabaseClient !== 'undefined' && SupabaseClient.pushCategoryUpdate) {
+      SupabaseClient.pushCategoryUpdate(oldName, newName, type);
+    }
+
+    // Refresh views everywhere
+    this.renderCategoryChips(type);
+    if (typeof Transactions !== 'undefined') {
+      Transactions.renderCategoryOptions(newName);
+      Transactions.renderCategoryManagerList(type);
+      Transactions.renderTable();
+    }
+    if (typeof Reports !== 'undefined') {
+      Reports.updateReport();
+    }
+
+    this.closeEditCategoryModal();
+    this.showToast(`Kategori berhasil diubah menjadi "${newName}"!`, 'success');
   },
 
   addNewCategory(type, explicitVal = null) {

@@ -440,7 +440,7 @@ const Transactions = {
       row.className = 'flex items-center justify-between p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition';
 
       const left = document.createElement('div');
-      left.className = 'flex items-center gap-2.5 overflow-hidden';
+      left.className = 'flex items-center gap-2.5 overflow-hidden flex-1 min-w-0 mr-2';
       left.innerHTML = `
         <div class="w-8 h-8 rounded-full bg-zinc-800 text-amber-400 flex items-center justify-center text-xs shrink-0">
           ${this.getCategoryIcon(cat)}
@@ -448,10 +448,23 @@ const Transactions = {
         <span class="text-xs font-semibold text-zinc-200 truncate">${cat}</span>
       `;
 
+      const actions = document.createElement('div');
+      actions.className = 'flex items-center gap-1.5 shrink-0';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 text-xs font-bold flex items-center gap-1 transition active:scale-95';
+      editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square text-xs"></i> <span>Edit</span>';
+      editBtn.title = `Ubah nama "${cat}"`;
+      editBtn.addEventListener('click', () => {
+        App.openEditCategoryModal(type, cat);
+      });
+
       const delBtn = document.createElement('button');
       delBtn.type = 'button';
-      delBtn.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition active:scale-95 shrink-0 ml-2';
+      delBtn.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition active:scale-95';
       delBtn.innerHTML = '<i class="fa-solid fa-trash-can text-xs"></i> <span>Hapus</span>';
+      delBtn.title = `Hapus "${cat}"`;
       delBtn.addEventListener('click', () => {
         if (!confirm(`Yakin ingin menghapus kategori "${cat}"?`)) return;
         App.deleteCategory(type, cat);
@@ -459,8 +472,10 @@ const Transactions = {
         this.renderCategoryOptions();
       });
 
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
       row.appendChild(left);
-      row.appendChild(delBtn);
+      row.appendChild(actions);
       listEl.appendChild(row);
     });
   },

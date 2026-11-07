@@ -425,6 +425,17 @@ const SupabaseClient = {
     } catch(e) { console.error('[Supabase] pushCategoryDelete failed:', e); }
   },
 
+  async pushCategoryUpdate(oldName, newName, type) {
+    if (!this.client) return;
+    try {
+      // 1. Update nama kategori di tabel categories
+      await this.client.from('categories').update({ name: newName }).eq('name', oldName).eq('type', type);
+      // 2. Update seluruh riwayat transaksi yang menggunakan kategori lama
+      await this.client.from('transactions').update({ category: newName }).eq('category', oldName).eq('type', type);
+      console.log('✅ [Supabase] Category updated:', oldName, '->', newName, type);
+    } catch(e) { console.error('[Supabase] pushCategoryUpdate failed:', e); }
+  },
+
   async pushTransaction(trx) {
     if (!this.client) return;
     try {

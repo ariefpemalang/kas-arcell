@@ -308,6 +308,29 @@ const Storage = {
     localStorage.setItem(key, JSON.stringify(list || []));
     this._notifyChange();
   },
+  updateCategory(type, oldName, newName) {
+    let list = this.getCategories(type);
+    const idx = list.indexOf(oldName);
+    if (idx !== -1) {
+      list[idx] = newName;
+      this.saveCategories(type, list);
+    }
+
+    // Update transactions that use this category
+    let trxs = this.getTransactions();
+    let updatedTrx = false;
+    trxs.forEach(t => {
+      if (t.type === type && t.category === oldName) {
+        t.category = newName;
+        updatedTrx = true;
+      }
+    });
+    if (updatedTrx) {
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(trxs));
+    }
+    this._notifyChange();
+    return true;
+  },
 
   // Transactions (Kas Masuk & Kas Keluar)
   getTransactions() {
